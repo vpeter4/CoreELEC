@@ -1,0 +1,48 @@
+#!/bin/sh
+  . config/options
+
+  echo
+  scripts/clean plymouth-lite
+  echo
+  scripts/clean linux
+  echo
+  scripts/clean initramfs
+  echo
+  scripts/clean busybox
+  echo
+
+  scripts/unpack busybox
+  echo
+  scripts/unpack linux
+  echo
+
+exit 0
+  
+  ROOT_BUILD=$BUILD
+  echo "ROOT_BUILD: $ROOT_BUILD"
+
+  echo "Building kernel with new initramfs"
+
+	if [ -n "$1" ]; then
+	  scripts/clean plymouth-lite
+	  rm -fr $ROOT_BUILD/image/.stamps/plymouth-lite
+	fi
+
+	rm -f  $ROOT_BUILD/.stamps/linux/build_target
+	rm -f  $ROOT_BUILD/.stamps/busybox/build_init
+
+	rm -fr $ROOT_BUILD/image/.stamps/linux
+	rm -fr $ROOT_BUILD/image/.stamps/initramfs
+	rm -fr $ROOT_BUILD/image/.stamps/busybox
+
+	find "$ROOT_BUILD/image/.stamps" -type f -name install_init -exec rm "{}" ';'
+	
+	rm -f "$ROOT_BUILD/image/initramfs.cpio"
+exit 5
+	#scripts/build linux
+	
+	echo
+	echo "Kernel with new initramfs ready"
+
+	#cp $ROOT_BUILD/linux-*/arch/arm/boot/zImage             ~/public/a/KERNEL
+	#cp $ROOT_BUILD/linux-*/arch/arm/boot/dts/imx6q-udoo.dtb ~/public/a
