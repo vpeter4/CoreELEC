@@ -1,0 +1,92 @@
+From 90dfbbf962cfe1f8c289525941ee993ec189d5b2 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Fri, 15 Nov 2019 10:52:35 +0100
+Subject: [PATCH] Amlogic: handle Dolby Vision as h265
+
+---
+ xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp        | 2 ++
+ .../VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp   | 1 +
+ xbmc/utils/BitstreamConverter.cpp                          | 7 ++++++-
+ 3 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+index e3a6401129..11a4b01880 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/AMLCodec.cpp
+@@ -417,6 +417,7 @@ static vformat_t codecid_to_vformat(enum AVCodecID id)
+       format = VFORMAT_AVS;
+       break;
+     case AV_CODEC_ID_HEVC:
++    case AV_CODEC_ID_DVVIDEO:
+       format = VFORMAT_HEVC;
+       break;
+ 
+@@ -532,6 +533,7 @@ static vdec_type_t codec_tag_to_vdec_type(unsigned int codec_tag)
+       dec_type = VIDEO_DEC_FORMAT_AVS;
+       break;
+     case AV_CODEC_ID_HEVC:
++    case AV_CODEC_ID_DVVIDEO:
+       // h265
+       dec_type = VIDEO_DEC_FORMAT_HEVC;
+       break;
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
+index dd9458906c..8c87b6d46a 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecAmlogic.cpp
+@@ -253,6 +253,7 @@ bool CDVDVideoCodecAmlogic::Open(CDVDStreamInfo &hints, CDVDCodecOptions &option
+       m_pFormatName = "am-vp9";
+       break;
+     case AV_CODEC_ID_HEVC:
++    case AV_CODEC_ID_DVVIDEO:
+       if (aml_support_hevc()) {
+         if (!aml_support_hevc_8k4k() && ((m_hints.width > 4096) || (m_hints.height > 2176)))
+         {
+diff --git a/xbmc/utils/BitstreamConverter.cpp b/xbmc/utils/BitstreamConverter.cpp
+index b7987bd218..8dfed9d1b6 100644
+--- a/xbmc/utils/BitstreamConverter.cpp
++++ b/xbmc/utils/BitstreamConverter.cpp
+@@ -429,6 +429,7 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int
+       return false;
+       break;
+     case AV_CODEC_ID_HEVC:
++    case AV_CODEC_ID_DVVIDEO:
+       if (in_extrasize < 23 || in_extradata == NULL)
+       {
+         CLog::Log(LOGERROR, "CBitstreamConverter::Open hvcC data too small or missing");
+@@ -535,7 +536,8 @@ bool CBitstreamConverter::Convert(uint8_t *pData, int iSize)
+   if (pData)
+   {
+     if (m_codec == AV_CODEC_ID_H264 ||
+-        m_codec == AV_CODEC_ID_HEVC)
++        m_codec == AV_CODEC_ID_HEVC ||
++        m_codec == AV_CODEC_ID_DVVIDEO)
+     {
+       if (m_to_annexb)
+       {
+@@ -844,6 +846,7 @@ bool CBitstreamConverter::IsIDR(uint8_t unit_type)
+     case AV_CODEC_ID_H264:
+       return unit_type == AVC_NAL_IDR_SLICE;
+     case AV_CODEC_ID_HEVC:
++    case AV_CODEC_ID_DVVIDEO:
+       return unit_type == HEVC_NAL_IDR_W_RADL ||
+              unit_type == HEVC_NAL_IDR_N_LP;
+     default:
+@@ -858,6 +861,7 @@ bool CBitstreamConverter::IsSlice(uint8_t unit_type)
+     case AV_CODEC_ID_H264:
+       return unit_type == AVC_NAL_SLICE;
+     case AV_CODEC_ID_HEVC:
++    case AV_CODEC_ID_DVVIDEO:
+       return unit_type == HEVC_NAL_TRAIL_R ||
+              unit_type == HEVC_NAL_TRAIL_N ||
+              unit_type == HEVC_NAL_TSA_N ||
+@@ -899,6 +903,7 @@ bool CBitstreamConverter::BitstreamConvert(uint8_t* pData, int iSize, uint8_t **
+       nal_sei = AVC_NAL_SEI;
+       break;
+     case AV_CODEC_ID_HEVC:
++    case AV_CODEC_ID_DVVIDEO:
+       nal_sps = HEVC_NAL_SPS;
+       nal_pps = HEVC_NAL_PPS;
+       nal_sei = HEVC_NAL_SEI_PREFIX;
+-- 
+2.17.1
+

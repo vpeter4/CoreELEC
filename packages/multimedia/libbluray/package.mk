@@ -3,14 +3,15 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="libbluray"
-PKG_VERSION="1.0.2"
-PKG_SHA256="6d9e7c4e416f664c330d9fa5a05ad79a3fb39b95adfc3fd6910cbed503b7aeff"
+PKG_VERSION="1.2.0"
+PKG_SHA256="cd41ea06fd2512a77ebf63872873641908ef81ce2fe4e4c842f6035a47696c11"
 PKG_LICENSE="LGPL"
 PKG_SITE="https://www.videolan.org/developers/libbluray.html"
 PKG_URL="http://download.videolan.org/pub/videolan/libbluray/$PKG_VERSION/$PKG_NAME-$PKG_VERSION.tar.bz2"
 PKG_DEPENDS_TARGET="toolchain fontconfig freetype libxml2"
 PKG_LONGDESC="libbluray is an open-source library designed for Blu-Ray Discs playback for media players."
 PKG_TOOLCHAIN="autotools"
+PKG_BUILD_FLAGS="-verbose"
 
 if [ "$BLURAY_AACS_SUPPORT" = "yes" ]; then
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET libaacs"
@@ -35,7 +36,13 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-werror \
                            --disable-doxygen-html \
                            --disable-doxygen-ps \
                            --disable-doxygen-pdf \
+                           --disable-udf \
+                           --enable-bdjava \
                            --with-freetype \
                            --with-fontconfig \
                            --with-libxml2 \
                            --with-gnu-ld"
+
+pre_configure_target() {
+  export CFLAGS="$CFLAGS -D_GNU_SOURCE"
+}

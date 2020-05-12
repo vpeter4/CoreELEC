@@ -1,0 +1,62 @@
+#!/bin/bash
+
+export PROJECT=Amlogic-ng
+
+. config/options linux
+scripts/unpack linux
+
+LINUX_BUILD_DIR="$(get_build_dir linux)"
+
+#################################################################
+if [ -d $ROOT/projects/$PROJECT/packages/linux/sources/arch/arm64/boot/dts/amlogic ]; then
+  echo
+  echo "Copying files from PROJECT folder to linux build dir ..."
+  echo
+
+  cp -a $ROOT/projects/$PROJECT/packages/linux/sources/arch/arm64/boot/dts/amlogic/* \
+        $LINUX_BUILD_DIR/arch/arm64/boot/dts/amlogic
+fi
+
+if [ -d $ROOT/packages/linux/sources/arch/arm64/boot/dts/amlogic ]; then
+  echo
+  echo "Copying files from PACKAGE folder to linux build dir ..."
+  echo
+
+  cp -a $ROOT/packages/linux/sources/arch/arm64/boot/dts/amlogic/* \
+        $LINUX_BUILD_DIR/arch/arm64/boot/dts/amlogic
+fi
+
+make dtbs \
+  ARCH=arm64 \
+  CROSS_COMPILE="$TOOLCHAIN/lib/gcc-arm-aarch64-linux-gnu/bin/aarch64-linux-gnu-" \
+  -C $LINUX_BUILD_DIR
+
+#################################################################
+echo
+(
+  cd $LINUX_BUILD_DIR/arch/arm64/boot/dts/amlogic/
+  ls -l g12b_a311d_khadas_vim3.dtb
+)
+echo
+echo $LINUX_BUILD_DIR/arch/arm64/boot/dts/amlogic/g12b_a311d_khadas_vim3.dtb
+echo
+echo "Copying dtb..."
+cp $LINUX_BUILD_DIR/arch/arm64/boot/dts/amlogic/g12b_a311d_khadas_vim3.dtb ~/public/amlogic
+cp $LINUX_BUILD_DIR/arch/arm64/boot/dts/amlogic/g12b_a311d_khadas_vim3.dtb ~/tmp
+
+
+echo "Running dtc..."
+
+dtc -I dtb -O dts \
+  $LINUX_BUILD_DIR/arch/arm64/boot/dts/amlogic/g12b_a311d_khadas_vim3.dtb \
+  -o ~/tmp/g12b_a311d_khadas_vim3-decompiled.dts
+
+dtc -I dtb -O dts \
+  $LINUX_BUILD_DIR/arch/arm64/boot/dts/amlogic/g12b_s922x_beelink_gt_king.dtb \
+  -o ~/tmp/g12b_s922x_beelink_gt_king-decompiled.dts
+
+dtc -I dtb -O dts \
+  $LINUX_BUILD_DIR/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4.dtb \
+  -o ~/tmp/sm1_s905x3_odroid_c4-decompiled.dts
+
+echo "Done..."
