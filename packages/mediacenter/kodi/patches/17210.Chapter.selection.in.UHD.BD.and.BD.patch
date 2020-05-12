@@ -1,0 +1,40 @@
+From 42b0f0521392b860153bdd5f3d3ea8b13c9751f4 Mon Sep 17 00:00:00 2001
+From: fandangos <veggav@gmail.com>
+Date: Fri, 17 Jan 2020 08:12:57 -0300
+Subject: [PATCH] [FIX] Chapter selection in UHD BD and BD
+
+---
+ .../VideoPlayer/DVDInputStreams/DVDInputStreamBluray.cpp     | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.cpp b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.cpp
+index 6c94a76315ee..c2bb47579009 100644
+--- a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.cpp
++++ b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.cpp
+@@ -500,6 +500,7 @@ void CDVDInputStreamBluray::ProcessEvent() {
+       m_title = disc_info->titles[m_event.param];
+     else
+       m_title = nullptr;
++    m_menu = false;
+ 
+     break;
+   }
+@@ -758,7 +759,6 @@ void CDVDInputStreamBluray::OverlayFlush(int64_t pts)
+ 
+   m_player->OnDiscNavResult(static_cast<void*>(group), BD_EVENT_MENU_OVERLAY);
+   group->Release();
+-  m_menu = true;
+ #endif
+ }
+ 
+@@ -1108,7 +1108,10 @@ void CDVDInputStreamBluray::OnMenu()
+   }
+ 
+   if(bd_user_input(m_bd, -1, BD_VK_POPUP) >= 0)
++  {
++    m_menu = !m_menu;
+     return;
++  }
+   CLog::Log(LOGDEBUG, "CDVDInputStreamBluray::OnMenu - popup failed, trying root");
+ 
+   if(bd_user_input(m_bd, -1, BD_VK_ROOT_MENU) >= 0)

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
+
+. config/options "${1}"
+
+if [ -z "$1" ]; then
+  echo "usage: $0 package_name[:<host|target|init|bootstrap>]"
+  exit 1
+fi
+
+[ "${1%:*}" = "kodi" ] && ./scripts/clean kodi-theme-Estuary
+
+./scripts/clean ${1%:*}
+./scripts/build $1
