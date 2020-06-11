@@ -15,7 +15,15 @@ unpack() {
   tar --strip-components=1 -xf $SOURCES/${PKG_NAME:4}/${PKG_NAME:4}-$PKG_VERSION.tar.bz2 -C $PKG_BUILD
 }
 
+post_unpack() {
+  if [ -d "$(get_pkg_directory libbluray)/sources" ]; then
+    cp -PRf "$(get_pkg_directory libbluray)/sources/"* $PKG_BUILD
+  fi
+}
+
 pre_configure_target() {
+	export CFLAGS="$CFLAGS -D_GNU_SOURCE"
+
   # build also jar
   PKG_CONFIGURE_OPTS_TARGET="${PKG_CONFIGURE_OPTS_TARGET/disable-bdjava-jar/enable-bdjava-jar}"
 }
