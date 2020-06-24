@@ -36,7 +36,6 @@ PKG_CONFIGURE_OPTS_TARGET="--disable-werror \
                            --disable-doxygen-html \
                            --disable-doxygen-ps \
                            --disable-doxygen-pdf \
-                           --disable-udf \
                            --enable-bdjava \
                            --with-freetype \
                            --with-fontconfig \
