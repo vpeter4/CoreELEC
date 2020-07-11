@@ -1,0 +1,78 @@
+From a4ba251e1fa997e95464f9946544d882a08042d6 Mon Sep 17 00:00:00 2001
+From: Sergei Trofimovich <slyfox@gentoo.org>
+Date: Thu, 23 Jan 2020 20:04:40 +0000
+Subject: [PATCH] libdvb5: fix build failure against gcc-10
+
+On gcc-10 (and gcc-9 -fno-common) build fails as:
+
+```
+  CCLD     libdvbv5.la
+ld: .libs/libdvbv5_la-dvb-fe.o:(.bss+0x0):
+  multiple definition of `delivery_system_name'; .libs/libdvbv5_la-dvb-v5.o:v4l-utils/lib/libdvbv5/dvb-v5.h:29: first defined here
+ld: .libs/libdvbv5_la-dvb-fe.o:(.bss+0xa0):
+  multiple definition of `dvb_v5_name'; .libs/libdvbv5_la-dvb-v5.o:v4l-utils/lib/libdvbv5/dvb-v5.h:28: first defined here
+```
+
+gcc-10 will change the default from -fcommon to fno-common:
+https://gcc.gnu.org/PR85678.
+
+The error also happens if CFLAGS=-fno-common passed explicitly.
+
+Bug: https://bugs.gentoo.org/706130
+Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+---
+ lib/include/libdvbv5/desc_t2_delivery.h |  2 +-
+ lib/libdvbv5/dvb-v5.h                   | 26 ++++++++++++-------------
+ 2 files changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/lib/include/libdvbv5/desc_t2_delivery.h b/lib/include/libdvbv5/desc_t2_delivery.h
+index 93594b76..8c11fa9a 100644
+--- a/lib/include/libdvbv5/desc_t2_delivery.h
++++ b/lib/include/libdvbv5/desc_t2_delivery.h
+@@ -215,7 +215,7 @@ extern const unsigned dvbt2_transmission_mode[];
+  * @brief converts from internal representation to string the SISO_MISO
+  *	  field of dvb_desc_t2_delivery:SISO_MISO field.
+  */
+-const char *siso_miso[4];
++extern const char *siso_miso[4];
+ 
+ #ifdef __cplusplus
+ }
+diff --git a/lib/libdvbv5/dvb-v5.h b/lib/libdvbv5/dvb-v5.h
+index 45aaddda..3540bac1 100644
+--- a/lib/libdvbv5/dvb-v5.h
++++ b/lib/libdvbv5/dvb-v5.h
+@@ -14,17 +14,17 @@ struct fe_status_name {
+ 	char *name;
+ };
+ extern struct fe_status_name fe_status_name[8];
+-const char *fe_code_rate_name[14];
+-const char *fe_modulation_name[15];
+-const char *fe_transmission_mode_name[10];
+-const unsigned fe_bandwidth_name[8];
+-const char *fe_guard_interval_name[12];
+-const char *fe_hierarchy_name[6];
+-const char *fe_voltage_name[4];
+-const char *fe_tone_name[3];
+-const char *fe_inversion_name[4];
+-const char *fe_pilot_name[4];
+-const char *fe_rolloff_name[5];
+-const char *dvb_v5_name[71];
+-const char *delivery_system_name[20];
++extern const char *fe_code_rate_name[14];
++extern const char *fe_modulation_name[15];
++extern const char *fe_transmission_mode_name[10];
++extern const unsigned fe_bandwidth_name[8];
++extern const char *fe_guard_interval_name[12];
++extern const char *fe_hierarchy_name[6];
++extern const char *fe_voltage_name[4];
++extern const char *fe_tone_name[3];
++extern const char *fe_inversion_name[4];
++extern const char *fe_pilot_name[4];
++extern const char *fe_rolloff_name[5];
++extern const char *dvb_v5_name[71];
++extern const char *delivery_system_name[20];
+ #endif
+-- 
+2.25.0
+
