@@ -23,3 +23,19 @@ fi
 for i in $PKG_DEPENDS_INIT; do
   PKG_NEED_UNPACK+=" $(get_pkg_directory $i)"
 done
+
+post_install() {
+  if [ "$BUILD_ANDROID_BOOTIMG" = "yes" ]; then
+  ( 
+    cd $BUILD/initramfs
+
+    ln -sfn /usr/lib  $BUILD/initramfs/lib
+    ln -sfn /usr/bin  $BUILD/initramfs/bin
+    ln -sfn /usr/sbin $BUILD/initramfs/sbin
+
+    mkdir -p $BUILD/image
+    fakeroot -- sh -c \
+      "mkdir -p dev; mknod -m 600 dev/console c 5 1; find . | cpio -H newc -ov -R 0:0 > $BUILD/image/initramfs.cpio"
+  )
+  fi
+} 

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 PKG_NAME="linux"
 PKG_LICENSE="GPL"
@@ -10,11 +11,30 @@ PKG_DEPENDS_TARGET="toolchain linux:host kmod:host xz:host keyutils $KERNEL_EXTR
 PKG_NEED_UNPACK="$LINUX_DEPENDS $(get_pkg_directory initramfs) $(get_pkg_variable initramfs PKG_NEED_UNPACK)"
 PKG_LONGDESC="This package contains a precompiled kernel image and the modules."
 PKG_IS_KERNEL_PKG="yes"
-PKG_STAMP="$KERNEL_TARGET $KERNEL_MAKE_EXTRACMD"
+PKG_STAMP="$KERNEL_TARGET $KERNEL_MAKE_EXTRACMD $KERNEL_UBOOT_EXTRA_TARGET"
 
 PKG_PATCH_DIRS="$LINUX"
 
 case "$LINUX" in
+  amlogic-3.14)
+    PKG_VERSION="07d26b4ce91cf934d65a64e2da7ab3bc75e59fcc"
+    PKG_SHA256="682f93c0bb8ad888a681e93882bc169007bacb880714b980af00ca34fb5b8365"
+    PKG_URL="https://github.com/CoreELEC/linux-amlogic/archive/$PKG_VERSION.tar.gz"
+    PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
+    PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host"
+    PKG_BUILD_PERF="no"
+    ;;
+  amlogic-4.9)
+    PKG_VERSION="204efb9e66c5f767ebc9e8a5647199efb5c10a46"
+    PKG_SHA256="b23aaf763657e3b57817fe7938eb8d0914e103c528f1d626050b2f923d70ab18"
+    PKG_URL="https://github.com/CoreELEC/linux-amlogic/archive/$PKG_VERSION.tar.gz"
+    PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
+    PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host"
+    PKG_DEPENDS_UNPACK="media_modules-aml"
+    PKG_NEED_UNPACK="$PKG_NEED_UNPACK $(get_pkg_directory media_modules-aml)"
+    PKG_BUILD_PERF="no"
+    PKG_GIT_BRANCH="amlogic-4.9"
+    ;;
   raspberrypi)
     PKG_VERSION="2ce8c3ab0f9d1ffb67310ffd200be82d80a8d13d" # 5.4.61
     PKG_SHA256="4e008bdb25d8d49223a1cd01cd5d5d882f511a7c6635a14f0a5100dd4a5e25ea"
@@ -49,6 +69,10 @@ fi
 
 if [[ "$KERNEL_TARGET" = uImage* ]]; then
   PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET u-boot-tools:host"
+fi
+
+if [ "$BUILD_ANDROID_BOOTIMG" = "yes" ]; then
+  PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET mkbootimg:host"
 fi
 
 # Ensure that the dependencies of initramfs:target are built correctly, but
@@ -137,11 +161,6 @@ makeinstall_host() {
 }
 
 pre_make_target() {
-  ( cd $ROOT
-    rm -rf $BUILD/initramfs
-    rm -f ${STAMPS_INSTALL}/initramfs/install_target ${STAMPS_INSTALL}/*/install_init
-    $SCRIPTS/install initramfs
-  )
   pkg_lock_status "ACTIVE" "linux:target" "build"
 
   if [ "$TARGET_ARCH" = "x86_64" ]; then
@@ -156,6 +175,9 @@ pre_make_target() {
   fi
 
   kernel_make oldconfig
+
+  # copy video firmware (kernel won't compile without it)
+  [ "$LINUX" = "amlogic-4.9" ] && cp -PR $(get_build_dir media_modules-aml)/firmware $PKG_BUILD/firmware/video || :
 }
 
 make_target() {
@@ -169,7 +191,42 @@ make_target() {
     KERNEL_TARGET="${KERNEL_TARGET/uImage/Image}"
   fi
 
+  kernel_make modules
+  kernel_make INSTALL_MOD_PATH=$INSTALL/$(get_kernel_overlay_dir) modules_install
+  rm -f $INSTALL/$(get_kernel_overlay_dir)/lib/modules/*/build
+  rm -f $INSTALL/$(get_kernel_overlay_dir)/lib/modules/*/source
+
+  rm -rf $BUILD/initramfs
+  rm -f ${STAMPS_INSTALL}/initramfs/install_target ${STAMPS_INSTALL}/*/install_init
+    
+  if [ -n "$INITRAMFS_MODULES" ]; then
+    mkdir -p $BUILD/initramfs/etc
+    mkdir -p $BUILD/initramfs/usr/lib/modules
+
+    for i in $INITRAMFS_MODULES; do
+      module=$(find $INSTALL/$(get_full_module_dir)/kernel -name $i.ko)
+      if [ -n "$module" ]; then
+        echo $i >> $BUILD/initramfs/etc/modules
+        cp $module $BUILD/initramfs/usr/lib/modules
+      fi
+    done
+  fi
+
+  # create initramfs.cpio needed by Android boot image
+  (
+    cd $ROOT
+    $SCRIPTS/install initramfs
+  )
+
+  # the modules target is required to get a proper Module.symvers
+  # file with symbols from built-in and external modules.
+  # Without that it'll contain only the symbols from the kernel
   kernel_make $KERNEL_TARGET $KERNEL_MAKE_EXTRACMD modules
+
+  if [ "$BUILD_ANDROID_BOOTIMG" = "yes" ]; then
+    find_file_path bootloader/mkbootimg && source ${FOUND_PATH}
+    mv -f arch/$TARGET_KERNEL_ARCH/boot/boot.img arch/$TARGET_KERNEL_ARCH/boot/$KERNEL_TARGET
+  fi
 
   if [ "$PKG_BUILD_PERF" = "yes" ] ; then
     ( cd tools/perf
@@ -238,10 +295,6 @@ makeinstall_target() {
   mkdir -p $INSTALL/.image
   cp -p arch/${TARGET_KERNEL_ARCH}/boot/${KERNEL_TARGET} System.map .config Module.symvers $INSTALL/.image/
 
-  kernel_make INSTALL_MOD_PATH=$INSTALL/$(get_kernel_overlay_dir) modules_install
-  rm -f $INSTALL/$(get_kernel_overlay_dir)/lib/modules/*/build
-  rm -f $INSTALL/$(get_kernel_overlay_dir)/lib/modules/*/source
-
   if [ "$BOOTLOADER" = "u-boot" ]; then
     mkdir -p $INSTALL/usr/share/bootloader
     for dtb in arch/$TARGET_KERNEL_ARCH/boot/dts/*.dtb arch/$TARGET_KERNEL_ARCH/boot/dts/*/*.dtb; do
@@ -249,6 +302,13 @@ makeinstall_target() {
         cp -v $dtb $INSTALL/usr/share/bootloader
       fi
     done
+
+    # Amlogic-ng
+    mkdir -p $INSTALL/usr/share/bootloader/device_trees
+    if [ -d arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic ]; then
+      cp arch/$TARGET_KERNEL_ARCH/boot/*dtb.img $INSTALL/usr/share/bootloader/ 2>/dev/null || :
+      [ "$PROJECT" = "Amlogic-ce" -a "$DEVICE" = "Amlogic-ng" ] && cp arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/*.dtb $INSTALL/usr/share/bootloader/device_trees 2>/dev/null || :
+    fi
   elif [ "$BOOTLOADER" = "bcm2835-bootloader" ]; then
     mkdir -p $INSTALL/usr/share/bootloader/overlays
 

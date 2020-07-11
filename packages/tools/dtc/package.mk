@@ -12,12 +12,12 @@ PKG_DEPENDS_HOST="toolchain:host"
 PKG_DEPENDS_TARGET="toolchain"
 PKG_LONGDESC="The Device Tree Compiler"
 
-PKG_MAKE_OPTS_TARGET="dtc fdtput fdtget libfdt"
+PKG_MAKE_OPTS_TARGET="dtc fdtput fdtget fdtdump libfdt"
 PKG_MAKE_OPTS_HOST="libfdt"
 
 makeinstall_host() {
   mkdir -p $TOOLCHAIN/lib
-    cp -P $PKG_BUILD/libfdt/libfdt.so $TOOLCHAIN/lib
+    cp -P $PKG_BUILD/libfdt/libfdt.so* $TOOLCHAIN/lib
 }
 
 makeinstall_target() {
@@ -25,6 +25,14 @@ makeinstall_target() {
     cp -P $PKG_BUILD/dtc $INSTALL/usr/bin
     cp -P $PKG_BUILD/fdtput $INSTALL/usr/bin/
     cp -P $PKG_BUILD/fdtget $INSTALL/usr/bin/
+    cp -P $PKG_BUILD/fdtdump $INSTALL/usr/bin/
   mkdir -p $INSTALL/usr/lib
-    cp -P $PKG_BUILD/libfdt/libfdt.so $INSTALL/usr/lib/
+    cp -PR $PKG_BUILD/libfdt/libfdt.so* $INSTALL/usr/lib/
+
+  # copy to toolchain
+  mkdir -p $SYSROOT_PREFIX/usr/{include,lib}
+    cp -P $PKG_BUILD/libfdt/libfdt.a $SYSROOT_PREFIX/usr/lib
+    cp -P $PKG_BUILD/libfdt/fdt.h $SYSROOT_PREFIX/usr/include
+    cp -P $PKG_BUILD/libfdt/libfdt.h $SYSROOT_PREFIX/usr/include
+    cp -P $PKG_BUILD/libfdt/libfdt_env.h $SYSROOT_PREFIX/usr/include
 }
