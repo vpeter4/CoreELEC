@@ -1,10 +1,23 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 # Copyright (C) 2017-present Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.tv)
 
 PKG_NAME="kodi"
-PKG_VERSION="ce1232862b929a5e1ab26e57e0502d0ee7be25c8"
-PKG_SHA256="699edc31c664a7912618ac1ebbf736137f5b972c3d720ed6143527e4d9c2c6f5"
+PKG_VERSION="fbef8cf4aca97418eb04f231a973ed4e4945c164"
+PKG_SHA256="ce2459ae7180e044139ec8f6a274fa463a0afbf9275fa0e28ce0fb404302fb3b"
+
+#old
+#    PKG_VERSION="06d904b5aab0ede4a777ac644051fc52fd74dc61"
+#    PKG_SHA256="51634aadfbe2e7ce5c5295673336f9be1f351dee320275bd39661aa01dfb13d1"
+    
+#    # CE
+#    PKG_VERSION="75d6f16f782da3d86a8d4ca59bea1a74f1a6b1c2"
+#    PKG_SHA256="42d7f043d4dd608efe8e17c255bc9fa829c8f9be2665630d3c9d9c04d77903f5"
+        
+#    PKG_URL="https://github.com/xbmc/xbmc/archive/$PKG_VERSION.tar.gz"
+#    PKG_SOURCE_NAME="kodi-$PKG_VERSION.tar.gz"
+    
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.kodi.tv"
 PKG_URL="https://github.com/xbmc/xbmc/archive/$PKG_VERSION.tar.gz"
@@ -169,6 +182,10 @@ configure_package() {
     KODI_ARCH="-DWITH_ARCH=$TARGET_ARCH"
   fi
 
+  if [ "$PROJECT" = "Amlogic-ce" ]; then
+    PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET amlogic.displayinfo"
+  fi
+
   if [ "$DEVICE" = "Slice" -o "$DEVICE" = "Slice3" ]; then
     PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET led_tools"
   fi
@@ -179,6 +196,8 @@ configure_package() {
       KODI_PLAYER="-DCORE_PLATFORM_NAME=gbm -DGBM_RENDER_SYSTEM=gles"
       CFLAGS="$CFLAGS -DEGL_NO_X11"
       CXXFLAGS="$CXXFLAGS -DEGL_NO_X11"
+    elif [ "$KODIPLAYER_DRIVER" = libamcodec ]; then
+      KODI_PLAYER="-DCORE_PLATFORM_NAME=aml"
     fi
   fi
 
@@ -275,6 +294,9 @@ post_makeinstall_target() {
     cp -R $PKG_DIR/config/repository.libreelec.tv $INSTALL/usr/share/kodi/addons
     sed -e "s|@ADDON_URL@|$ADDON_URL|g" -i $INSTALL/usr/share/kodi/addons/repository.libreelec.tv/addon.xml
     sed -e "s|@ADDON_VERSION@|$ADDON_VERSION|g" -i $INSTALL/usr/share/kodi/addons/repository.libreelec.tv/addon.xml
+    cp -R $PKG_DIR/config/repository.coreelec $INSTALL/usr/share/kodi/addons
+    sed -e "s|@ADDON_URL@|$ADDON_URL|g" -i $INSTALL/usr/share/kodi/addons/repository.coreelec/addon.xml
+    sed -e "s|@ADDON_VERSION@|$ADDON_VERSION|g" -i $INSTALL/usr/share/kodi/addons/repository.coreelec/addon.xml
     cp -R $PKG_DIR/config/repository.kodi.game $INSTALL/usr/share/kodi/addons
 
   mkdir -p $INSTALL/usr/share/kodi/config
@@ -309,12 +331,17 @@ post_makeinstall_target() {
   xmlstarlet ed -L -d "/addons/addon[text()='skin.estouchy']" $ADDON_MANIFEST
   xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "repository.kodi.game" $ADDON_MANIFEST
   xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "repository.libreelec.tv" $ADDON_MANIFEST
+  xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "repository.coreelec" $ADDON_MANIFEST
   if [ -n "$DISTRO_PKG_SETTINGS" ]; then
     xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "$DISTRO_PKG_SETTINGS_ID" $ADDON_MANIFEST
   fi
 
   if [ "$DRIVER_ADDONS_SUPPORT" = "yes" ]; then
     xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "script.program.driverselect" $ADDON_MANIFEST
+  fi
+
+  if [ "$PROJECT" = "Amlogic-ce" ]; then
+    xmlstarlet ed -L --subnode "/addons" -t elem -n "addon" -v "script.amlogic.displayinfo" $ADDON_MANIFEST
   fi
 
   if [ "$DEVICE" = "Slice" -o "$DEVICE" = "Slice3" ]; then
