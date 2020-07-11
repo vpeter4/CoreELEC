@@ -1,0 +1,16 @@
+add url and group parameter to json PVR.GetChannels
+need kodi patch kodi-151-json-stream-url-group.patch
+
+kodi-json '{"jsonrpc": "2.0", "id": 1, "method": "PVR.GetChannels", "params": {"channelgroupid": "alltv", "properties": ["uniqueid", "url", "group"]}}'
+
+diff -aurNp a/src/PVRIptvData.cpp b/PVRIptvData.cpp
+--- a/src/PVRIptvData.cpp	2018-02-05 09:22:58.000000000 +0100
++++ b/PVRIptvData.cpp	2018-05-21 08:51:15.851004727 +0200
+@@ -1008,6 +1008,8 @@ PVR_ERROR PVRIptvData::GetChannels(ADDON
+       strncpy(xbmcChannel.strChannelName, channel.strChannelName.c_str(), sizeof(xbmcChannel.strChannelName) - 1);
+       xbmcChannel.iEncryptionSystem = channel.iEncryptionSystem;
+       strncpy(xbmcChannel.strIconPath, channel.strLogoPath.c_str(), sizeof(xbmcChannel.strIconPath) - 1);
++      strncpy(xbmcChannel.strStreamURL, channel.strStreamURL.c_str(), sizeof(xbmcChannel.strStreamURL) - 1);
++      strncpy(xbmcChannel.strGroupName, channel.strGroupName.c_str(), sizeof(xbmcChannel.strGroupName) - 1);
+       xbmcChannel.bIsHidden         = false;
+       strncpy(xbmcChannel.strInputFormat, IsArchiveSupportedOnChannel(channel) ? "iptv/hasarchive" : "", sizeof(xbmcChannel.strInputFormat) - 1);

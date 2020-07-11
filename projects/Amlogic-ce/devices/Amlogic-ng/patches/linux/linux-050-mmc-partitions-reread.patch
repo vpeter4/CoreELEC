@@ -1,0 +1,115 @@
+unbind and bind eMMC to re-read partition table
+
+echo emmc\:0001 >/sys/bus/mmc/drivers/mmcblk/unbind
+sleep 1
+echo emmc\:0001 >/sys/bus/mmc/drivers/mmcblk/bind
+
+
+--- a/drivers/amlogic/mmc/emmc_partitions.c	2019-08-10 11:19:49.256164700 +0200
++++ b/drivers/amlogic/mmc/emmc_partitions.c	2019-08-10 11:20:27.332048700 +0200
+@@ -87,14 +87,19 @@ struct gpt_header {
+ 	__le32 partition_entry_array_crc32;
+ };
+ 
+-static dev_t amlmmc_dtb_no;
+-struct cdev amlmmc_dtb;
++static dev_t amlmmc_dtb_no = 0;
++static struct cdev amlmmc_dtb;
+ struct device *dtb_dev;
+-struct class *amlmmc_dtb_class;
++static struct class *amlmmc_dtb_class = NULL;
+ struct mmc_card *card_dtb;
+ static struct aml_dtb_info dtb_infos = {{0, 0}, {0, 0} };
+ struct mmc_partitions_fmt *pt_fmt;
+ 
++static bool init_card_again = false;
++static struct class *aml_store_class = NULL;
++struct proc_dir_entry *proc_card_inand = NULL;
++struct proc_dir_entry *proc_card_ntd = NULL;
++
+ /* dtb read&write operation with backup updates */
+ static unsigned int _calc_dtb_checksum(struct aml_dtb_rsv *dtb)
+ {
+@@ -928,7 +933,6 @@ static int add_emmc_partition(struct gen
+ 	struct hd_struct *ret = NULL;
+ 	uint64_t offset, size, cap;
+ 	struct partitions *pp;
+-	struct proc_dir_entry *proc_card;
+ 
+ 	pr_info("add_emmc_partition\n");
+ 
+@@ -958,12 +962,13 @@ static int add_emmc_partition(struct gen
+ 	}
+ 	/* create /proc/inand */
+ 
+-	proc_card = proc_create("inand", 0444, NULL, &card_proc_fops);
+-	if (!proc_card)
++	proc_card_inand = proc_create("inand", 0444, NULL, &card_proc_fops);
++	if (!proc_card_inand)
+ 		pr_info("[%s] create /proc/inand fail.\n", __func__);
+ 
+ 	/* create /proc/ntd */
+-	if (!proc_create("ntd", 0444, NULL, &card_proc_fops))
++	proc_card_ntd = proc_create("ntd", 0444, NULL, &card_proc_fops);
++	if (!proc_card_ntd)
+ 		pr_info("[%s] create /proc/ntd fail.\n", __func__);
+ 
+ 	return 0;
+@@ -1134,7 +1139,6 @@ int aml_emmc_partition_ops(struct mmc_ca
+ 	struct amlsd_host *host = mmc_priv(mmc_host);
+ 	struct disk_part_iter piter;
+ 	struct hd_struct *part;
+-	struct class *aml_store_class = NULL;
+ 	struct gpt_header *gpt_h = NULL;
+ 	unsigned char *buffer = NULL;
+ 
+@@ -1143,6 +1147,40 @@ int aml_emmc_partition_ops(struct mmc_ca
+ 	if (is_card_emmc(card) == 0) /* not emmc, nothing to do */
+ 		return 0;
+ 
++  if (init_card_again) {
++  	pr_info("%s init again, remove old entries\n", __func__);
++
++		if (aml_store_class) {
++			class_remove_file(aml_store_class, &bootloader_offset);
++			class_remove_file(aml_store_class, &aml_store_device);
++			class_remove_file(aml_store_class, &aml_part_table);
++			class_remove_file(aml_store_class, &aml_version);
++			class_destroy(aml_store_class);
++
++			aml_store_class = NULL;
++		}
++
++		if (proc_card_ntd)
++			proc_remove(proc_card_ntd);
++
++		if (proc_card_inand)
++			proc_remove(proc_card_inand);
++
++		proc_card_ntd = NULL;
++		proc_card_inand = NULL;
++
++		if (amlmmc_dtb_class) {
++			device_destroy(amlmmc_dtb_class, amlmmc_dtb_no);
++			class_remove_file(amlmmc_dtb_class, &class_attr_emmcdtb);
++			class_destroy(amlmmc_dtb_class);
++			cdev_del(&amlmmc_dtb);
++			unregister_chrdev_region(amlmmc_dtb_no, 1);
++			amlmmc_dtb_class = NULL;
++		}
++
++		pr_info("%s init again, done\n", __func__);
++	}
++
+ 	buffer = kmalloc(512, GFP_KERNEL);
+ 	if (!buffer)
+ 		return -ENOMEM;
+@@ -1230,6 +1268,8 @@ int aml_emmc_partition_ops(struct mmc_ca
+ 		goto out_class3;
+ 	}
+ 
++	init_card_again = true;  /* next time remove stores and do it again */
++
+ 	/* ret = class_create_file(aml_store_class, &cd_irq_cnt_);
+ 	 *if (ret) {
+ 	 *	pr_info("[%s] can't create aml_store_class file .\n", __func__);

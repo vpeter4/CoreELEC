@@ -1,0 +1,167 @@
+add url and group parameter to json PVR.GetChannels
+
+diff -aurNp a/xbmc/addons/kodi-addon-dev-kit/include/kodi/addon-instance/pvr/Channels.h b/xbmc/addons/kodi-addon-dev-kit/include/kodi/addon-instance/pvr/Channels.h
+--- a/xbmc/addons/kodi-addon-dev-kit/include/kodi/addon-instance/pvr/Channels.h	2020-06-27 19:41:31.000000000 +0200
++++ b/xbmc/addons/kodi-addon-dev-kit/include/kodi/addon-instance/pvr/Channels.h	2020-07-03 17:12:35.265998413 +0200
+@@ -171,6 +171,17 @@ public:
+ 
+   /// @brief To get with @ref SetOrder changed values.
+   bool GetOrder() const { return m_cStructure->iOrder; }
++
++  void SetChannelStreamURL(const std::string& url)
++  {
++    strncpy(m_cStructure->strStreamURL, url.c_str(), sizeof(m_cStructure->strStreamURL) - 1);
++  }
++
++  void SetChannelGroupName(const std::string& name)
++  {
++    strncpy(m_cStructure->strGroupName, name.c_str(), sizeof(m_cStructure->strGroupName) - 1);
++  }
++
+   ///@}
+ 
+ private:
+diff -aurNp a/xbmc/addons/kodi-addon-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_channels.h b/xbmc/addons/kodi-addon-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_channels.h
+--- a/xbmc/addons/kodi-addon-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_channels.h	2020-06-24 11:05:10.000000000 +0200
++++ b/xbmc/addons/kodi-addon-dev-kit/include/kodi/c-api/addon-instance/pvr/pvr_channels.h	2020-07-03 17:12:35.265998413 +0200
+@@ -49,6 +49,8 @@ extern "C"
+     bool bIsHidden;
+     bool bHasArchive;
+     int iOrder;
++    char strStreamURL[PVR_ADDON_URL_STRING_LENGTH];
++    char strGroupName[PVR_ADDON_INPUT_FORMAT_STRING_LENGTH];
+   } PVR_CHANNEL;
+ 
+   /*!
+diff -aurNp a/xbmc/interfaces/json-rpc/schema/types.json b/xbmc/interfaces/json-rpc/schema/types.json
+--- a/xbmc/interfaces/json-rpc/schema/types.json	2020-06-27 19:41:09.000000000 +0200
++++ b/xbmc/interfaces/json-rpc/schema/types.json	2020-07-03 17:12:35.253998860 +0200
+@@ -1054,7 +1054,7 @@
+     "items": { "type": "string",
+       "enum": [ "thumbnail", "channeltype", "hidden", "locked", "channel", "lastplayed",
+                 "broadcastnow", "broadcastnext", "uniqueid", "icon", "channelnumber",
+-                "subchannelnumber", "isrecording", "hasarchive" ]
++                "subchannelnumber", "isrecording", "hasarchive", "url", "group" ]
+     }
+   },
+   "PVR.Details.Channel": {
+@@ -1074,7 +1074,9 @@
+       "channelnumber": { "type": "integer" },
+       "subchannelnumber": { "type": "integer" },
+       "isrecording": { "type": "boolean" },
+-      "hasarchive": { "type": "boolean" }
++      "hasarchive": { "type": "boolean" },
++      "url": { "type": "string" },
++      "group": { "type": "string" }
+     }
+   },
+   "PVR.Details.ChannelGroup": {
+diff -aurNp a/xbmc/pvr/channels/PVRChannel.cpp b/xbmc/pvr/channels/PVRChannel.cpp
+--- a/xbmc/pvr/channels/PVRChannel.cpp	2020-06-24 11:05:10.000000000 +0200
++++ b/xbmc/pvr/channels/PVRChannel.cpp	2020-07-03 17:12:35.285997669 +0200
+@@ -59,7 +59,9 @@ CPVRChannel::CPVRChannel(const PVR_CHANN
+     m_clientChannelNumber(channel.iChannelNumber, channel.iSubChannelNumber),
+     m_strClientChannelName(channel.strChannelName),
+     m_strMimeType(channel.strMimeType),
+-    m_iClientEncryptionSystem(channel.iEncryptionSystem)
++    m_iClientEncryptionSystem(channel.iEncryptionSystem),
++    m_strStreamURL(channel.strStreamURL),
++    m_strGroupName(channel.strGroupName)
+ {
+   if (m_strChannelName.empty())
+     m_strChannelName = StringUtils::Format("%s %d", g_localizeStrings.Get(19029).c_str(), m_iUniqueId);
+@@ -96,6 +98,9 @@ void CPVRChannel::Serialize(CVariant& va
+ 
+   value["isrecording"] = false; // compat
+   value["hasarchive"] = m_bHasArchive;
++
++  value["url"] = m_strStreamURL;
++  value["group"] = m_strGroupName;
+ }
+ 
+ /********** XBMC related channel methods **********/
+@@ -179,6 +184,11 @@ bool CPVRChannel::UpdateFromClient(const
+   if (m_strIconPath.empty() || !IsUserSetIcon())
+     SetIconPath(channel->IconPath());
+ 
++  if (m_strStreamURL.empty())
++    SetChannelStreamURL(channel->StreamURL());
++  if (m_strGroupName.empty())
++    SetChannelGroupName(channel->GroupName());
++
+   return m_bChanged;
+ }
+ 
+@@ -493,6 +503,44 @@ void CPVRChannel::UpdateEncryptionName()
+   m_strClientEncryptionName = GetEncryptionName(m_iClientEncryptionSystem);
+ }
+ 
++bool CPVRChannel::SetChannelStreamURL(const std::string &url)
++{
++  CSingleLock lock(m_critSection);
++  if (m_strStreamURL != url)
++  {
++    m_strStreamURL = StringUtils::Format("%s", url.c_str());
++    m_bChanged = true;
++    return true;
++  }
++
++  return false;
++}
++
++std::string CPVRChannel::StreamURL() const
++{
++  CSingleLock lock(m_critSection);
++  return m_strStreamURL;
++}
++
++bool CPVRChannel::SetChannelGroupName(const std::string &name)
++{
++  CSingleLock lock(m_critSection);
++  if (m_strGroupName != name)
++  {
++    m_strGroupName = StringUtils::Format("%s", name.c_str());
++    m_bChanged = true;
++    return true;
++  }
++
++  return false;
++}
++
++std::string CPVRChannel::GroupName() const
++{
++  CSingleLock lock(m_critSection);
++  return m_strGroupName;
++}
++
+ /********** EPG methods **********/
+ 
+ std::vector<std::shared_ptr<CPVREpgInfoTag>> CPVRChannel::GetEpgTags() const
+diff -aurNp a/xbmc/pvr/channels/PVRChannel.h b/xbmc/pvr/channels/PVRChannel.h
+--- a/xbmc/pvr/channels/PVRChannel.h	2020-06-24 11:05:10.000000000 +0200
++++ b/xbmc/pvr/channels/PVRChannel.h	2020-07-03 17:12:35.285997669 +0200
+@@ -212,6 +212,13 @@ namespace PVR
+      * @brief reset changed flag after persist
+      */
+     void Persisted();
++
++    std::string StreamURL() const;
++    std::string GroupName() const;
++
++    bool SetChannelStreamURL(const std::string& url);
++    bool SetChannelGroupName(const std::string& name);
++
+     //@}
+ 
+     /*! @name Client related channel methods
+@@ -470,6 +476,10 @@ namespace PVR
+     CPVRChannelNumber m_channelNumber; /*!< the active channel number this channel has in the currently selected channel group */
+     std::shared_ptr<CPVRRadioRDSInfoTag> m_rdsTag; /*! < the radio rds data, if available for the channel. */
+     bool m_bHasArchive = false; /*!< true if this channel supports archive */
++
++    std::string m_strStreamURL; /*!< url of the stream */
++    std::string m_strGroupName; /*!< group name of the stream */
++
+     //@}
+ 
+     /*! @name EPG related channel data

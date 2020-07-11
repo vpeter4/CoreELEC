@@ -1,0 +1,82 @@
+================================================================================
+thank you seo
+
+--- a/xbmc/pvr/PVRContextMenus.cpp	2017-10-02 21:40:20.000000000 +0200
++++ b/xbmc/pvr/PVRContextMenus.cpp	2017-10-20 23:03:19.862605600 +0200
+@@ -46,6 +46,7 @@ namespace PVR
+     };
+ 
+     DECL_STATICCONTEXTMENUITEM(PlayEpgTag);
++    DECL_STATICCONTEXTMENUITEM(PlayFromBeginning);
+     DECL_STATICCONTEXTMENUITEM(PlayRecording);
+     DECL_CONTEXTMENUITEM(ShowInformation);
+     DECL_STATICCONTEXTMENUITEM(ShowChannelGuide);
+@@ -133,6 +133,31 @@ namespace PVR
+     }
+ 
+     ///////////////////////////////////////////////////////////////////////////////
++    // Play from beginning
++
++    bool PlayFromBeginning::IsVisible(const CFileItem &item) const
++    {
++      // don't understand why this works
++      const std::shared_ptr<CPVREpgInfoTag> epg(item.GetEPGInfoTag());
++      if (epg)
++      {
++        if (epg->IsPlayable())
++        	 return false;
++      }
++
++      const std::shared_ptr<CPVRChannel> channel(item.GetPVRChannelInfoTag());
++      if (channel)
++        return channel->GetEPGNow().get() != nullptr;
++
++      return false;
++    }
++
++    bool PlayFromBeginning::Execute(const CFileItemPtr &item) const
++    {
++      return CServiceBroker::GetPVRManager().GUIActions()->PlayEpgTag(item);
++    }
++
++    ///////////////////////////////////////////////////////////////////////////////
+     // Show information (epg, recording)
+ 
+     std::string ShowInformation::GetLabel(const CFileItem &item) const
+@@ -597,6 +597,7 @@ namespace PVR
+   {
+     m_items = {
+         std::make_shared<CONTEXTMENUITEM::PlayEpgTag>(19190), /* Play programme */
++        std::make_shared<CONTEXTMENUITEM::PlayFromBeginning>(12021), /* Play from beginning */
+         std::make_shared<CONTEXTMENUITEM::PlayRecording>(19687), /* Play recording */
+         std::make_shared<CONTEXTMENUITEM::ShowInformation>(),
+         std::make_shared<CONTEXTMENUITEM::ShowChannelGuide>(19686), /* Channel guide */
+
+================================================================================
+not very smart way of doing but it does the job
+
+rearrange menu order in context menu so 'Play from beginning' is first one
+
+--- a/xbmc/ContextMenuManager.cpp	2017-10-02 21:40:20.000000000 +0200
++++ b/xbmc/ContextMenuManager.cpp	2017-10-20 21:04:59.807081100 +0200
+@@ -79,8 +79,15 @@ void CContextMenuManager::Init()
+   ReloadAddonItems();
+ 
+   const std::vector<std::shared_ptr<IContextMenuItem>> pvrItems(CPVRContextMenuManager::GetInstance().GetMenuItems());
+-  for (const auto &item : pvrItems)
+-    m_items.emplace_back(item);
++
++  std::vector<std::shared_ptr<IContextMenuItem>> m_items_tmp;
++
++  m_items_tmp = pvrItems;
++
++  for (const auto &item : m_items)
++    m_items_tmp.emplace_back(item);
++
++  m_items = m_items_tmp;
+ }
+ 
+ void CContextMenuManager::ReloadAddonItems()
+
+
+================================================================================

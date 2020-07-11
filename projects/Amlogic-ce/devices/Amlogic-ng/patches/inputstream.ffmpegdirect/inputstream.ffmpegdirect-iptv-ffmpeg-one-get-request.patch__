@@ -1,0 +1,48 @@
+https://github.com/xbmc/xbmc/pull/16355
+
+send only one GET request for m3u8 playlist on channel switch
+don't really understand why this helps but it does :)
+
+copied from kodi-ce-100.03-reverts.patch
+  https://github.com/CoreELEC/CoreELEC/commit/2ee96490c1#diff-ce6daa3596d2c7735bce0a2fb85aa921
+
+
+--- a/src/stream/FFmpegStream.cpp_01	2020-06-30 10:22:15.432446211 +0200
++++ b/src/stream/FFmpegStream.cpp	2020-06-30 10:22:23.496128635 +0200
+@@ -899,32 +899,11 @@ bool FFmpegStream::OpenWithFFmpeg(AVInpu
+       }
+     }
+   }
+-  if (result < 0)
++  if (result < 0 && avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0 )
+   {
+-    m_pFormatContext->flags |= AVFMT_FLAG_PRIV_OPT;
+-    if (avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0)
+-    {
+-      Log(LOGLEVEL_DEBUG, "Error, could not open file %s", CURL::GetRedacted(strFile).c_str());
+-      Dispose();
+-      av_dict_free(&options);
+-      return false;
+-    }
+-
+-    av_dict_free(&options);
+-    avformat_close_input(&m_pFormatContext);
+-    m_pFormatContext = avformat_alloc_context();
+-    m_pFormatContext->interrupt_callback = int_cb;
+-    m_pFormatContext->flags &= ~AVFMT_FLAG_PRIV_OPT;
+-    options = GetFFMpegOptionsFromInput();
+-    av_dict_set_int(&options, "load_all_variants", 0, AV_OPT_SEARCH_CHILDREN);
+-
+-    if (avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0)
+-    {
+-      Log(LOGLEVEL_DEBUG, "Error, could not open file (2) %s", CURL::GetRedacted(strFile).c_str());
+-      Dispose();
+-      av_dict_free(&options);
+-      return false;
+-    }
++    Log(LOGLEVEL_DEBUG, "Error, could not open file (2) %s", CURL::GetRedacted(strFile).c_str());
++    Dispose();
++    return false;
+   }
+ 
+   av_dict_free(&options);

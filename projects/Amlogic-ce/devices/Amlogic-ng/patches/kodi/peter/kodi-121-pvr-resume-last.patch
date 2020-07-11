@@ -1,0 +1,69 @@
+add context menu "Resume last"
+
+--- a/addons/resource.language.en_gb/resources/strings.po	2018-09-19 15:50:58.000000000 +0200
++++ b/addons/resource.language.en_gb/resources/strings.po	2018-10-04 19:34:58.000000000 +0200
+@@ -5580,6 +5580,12 @@ msgctxt "#12023"
+ msgid "Resume from {0:s}"
+ msgstr ""
+ 
++#. Label for showing new item
++#: xbmc/pvr/PVRContextMenus.cpp
++msgctxt "#12024"
++msgid "Resume last"
++msgstr ""
++
+ #empty strings from id 12023 to 12309
+ 
+ #: addons/skin.estuary/xml/DialogNumeric.xml
+
+--- a/xbmc/pvr/PVRContextMenus.cpp	2018-10-04 19:36:56.094593690 +0200
++++ b/xbmc/pvr/PVRContextMenus.cpp	2018-10-04 19:37:37.987919567 +0200
+@@ -14,6 +14,7 @@
+ #include "addons/PVRClientMenuHooks.h"
+ #include "guilib/GUIWindowManager.h"
+ #include "utils/URIUtils.h"
++#include "interfaces/builtins/Builtins.h"
+ 
+ #include "pvr/PVRGUIActions.h"
+ #include "pvr/PVRManager.h"
+@@ -47,6 +47,7 @@ namespace PVR
+ 
+     DECL_STATICCONTEXTMENUITEM(PlayEpgTag);
+     DECL_STATICCONTEXTMENUITEM(PlayFromBeginning);
++    DECL_STATICCONTEXTMENUITEM(ResumeLast);
+     DECL_STATICCONTEXTMENUITEM(PlayRecording);
+     DECL_CONTEXTMENUITEM(ShowInformation);
+     DECL_STATICCONTEXTMENUITEM(ShowChannelGuide);
+@@ -159,6 +159,23 @@ namespace PVR
+     }
+ 
+     ///////////////////////////////////////////////////////////////////////////////
++    // Resume last
++
++    bool ResumeLast::IsVisible(const CFileItem &item) const
++    {
++      if (item.IsLiveTV() || item.IsEPG())
++        return true;
++
++      return false;
++    }
++
++    bool ResumeLast::Execute(const CFileItemPtr &item) const
++    {
++      CBuiltins::GetInstance().Execute("RunAddon(service.telemach-eon, resumeLast)");
++      return true;
++    }
++
++    ///////////////////////////////////////////////////////////////////////////////
+     // Show information (epg, recording)
+ 
+     std::string ShowInformation::GetLabel(const CFileItem &item) const
+@@ -624,6 +624,7 @@ namespace PVR
+     m_items = {
+         std::make_shared<CONTEXTMENUITEM::PlayEpgTag>(19190), /* Play programme */
+         std::make_shared<CONTEXTMENUITEM::PlayFromBeginning>(12021), /* Play from beginning */
++        std::make_shared<CONTEXTMENUITEM::ResumeLast>(12024), /* Resume last */
+         std::make_shared<CONTEXTMENUITEM::PlayRecording>(19687), /* Play recording */
+         std::make_shared<CONTEXTMENUITEM::ShowInformation>(),
+         std::make_shared<CONTEXTMENUITEM::ShowChannelGuide>(19686), /* Channel guide */
+

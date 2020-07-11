@@ -1,0 +1,18 @@
+--- a/xbmc/video/windows/GUIWindowVideoBase.cpp	2020-07-02 10:37:36.000000000 +0200
++++ b/xbmc/video/windows/GUIWindowVideoBase.cpp	2020-07-04 15:52:01.060604600 +0200
+@@ -161,6 +161,15 @@ bool CGUIWindowVideoBase::OnMessage(CGUI
+           }
+ 
+           // not playing video, or playback speed == 1
++
++          // resume playing without asking what to do
++          if (iItem >= 0 && iItem < m_vecItems->Size())
++          {
++            CFileItemPtr item = m_vecItems->Get(iItem);
++            if (! item->m_bIsFolder)
++              return OnFileAction(iItem, SELECT_ACTION_RESUME, "");
++          }
++
+           return OnResumeItem(iItem);
+         }
+         else if (iAction == ACTION_DELETE_ITEM)

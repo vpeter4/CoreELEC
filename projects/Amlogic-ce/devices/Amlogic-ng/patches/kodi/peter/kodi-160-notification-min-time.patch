@@ -1,0 +1,43 @@
+==================================================================
+The time in milliseconds the notification will be visible
+from 1500 ms to 50 ms
+
+--- a/xbmc/interfaces/json-rpc/schema/methods.json	2018-04-01 15:21:09.860968572 +0200
++++ b/xbmc/interfaces/json-rpc/schema/methods.json	2018-04-01 15:19:53.248467039 +0200
+@@ -1814,7 +1814,7 @@
+           { "type": "string", "required": true }
+         ], "default": ""
+       },
+-      { "name": "displaytime", "type": "integer", "minimum": 1500, "default": 5000, "description": "The time in milliseconds the notification will be visible" }
++      { "name": "displaytime", "type": "integer", "minimum": 50, "default": 5000, "description": "The time in milliseconds the notification will be visible" }
+     ],
+     "returns": "string"
+   },
+
+
+
+--- a/xbmc/dialogs/GUIDialogKaiToast.h	2018-03-14 15:39:05.000000000 +0100
++++ b/xbmc/dialogs/GUIDialogKaiToast.h	2018-04-01 15:51:27.641290332 +0200
+@@ -13,7 +13,7 @@
+ #include <queue>
+ 
+ #define TOAST_DISPLAY_TIME   5000L  // default 5 seconds
+-#define TOAST_MESSAGE_TIME   1000L  // minimal message time 1 second
++#define TOAST_MESSAGE_TIME   50L  // minimal message time 100 milliseconds
+ 
+ class CGUIDialogKaiToast: public CGUIDialog
+ {
+
+
+
+--- a/xbmc/dialogs/GUIDialogKaiToast.cpp	2018-03-14 15:39:05.000000000 +0100
++++ b/xbmc/dialogs/GUIDialogKaiToast.cpp	2018-04-01 15:53:34.260120470 +0200
+@@ -75,7 +75,7 @@ void CGUIDialogKaiToast::AddToQueue(cons
+   toast.imagefile = aImageFile;
+   toast.caption = aCaption;
+   toast.description = aDescription;
+-  toast.displayTime = displayTime > TOAST_MESSAGE_TIME + 500 ? displayTime : TOAST_MESSAGE_TIME + 500;
++  toast.displayTime = displayTime > TOAST_MESSAGE_TIME ? displayTime : TOAST_MESSAGE_TIME;
+   toast.messageTime = messageTime;
+   toast.withSound = withSound;
+ 

@@ -1,0 +1,74 @@
+diff -aurNp a/src/iptvsimple/CatchupController.cpp b/src/iptvsimple/CatchupController.cpp
+--- a/src/iptvsimple/CatchupController.cpp	2020-07-01 10:52:54.000000000 +0200
++++ b/src/iptvsimple/CatchupController.cpp	2020-07-01 14:43:51.288332763 +0200
+@@ -13,6 +13,7 @@
+ #include "Settings.h"
+ #include "data/Channel.h"
+ #include "utilities/Logger.h"
++#include "utilities/FileUtils.h"
+ 
+ #include <regex>
+ 
+@@ -63,6 +64,14 @@ void CatchupController::ProcessChannelFo
+       {
+         m_timeshiftBufferOffset = Settings::GetInstance().GetCatchupDaysInSeconds(); //offset from now to start of catchup window
+         m_timeshiftBufferStartTime = std::time(nullptr) - Settings::GetInstance().GetCatchupDaysInSeconds(); // now - the window size
++
++//aaa  11:35
++//        m_timeshiftBufferStartTime = std::time(nullptr) - (std::time(nullptr) - 1593509700) - Settings::GetInstance().GetCatchupDaysInSeconds(); // now - the window size
++
++        time_t timeResumeLast = GetTimeResumeLast(channel.GetUniqueId());
++        Logger::Log(LEVEL_DEBUG, "GetChannelStreamProperties timeResumeLast %s", ConvertTime(timeResumeLast));
++        if (timeResumeLast > 0)
++          m_timeshiftBufferStartTime = timeResumeLast - Settings::GetInstance().GetCatchupDaysInSeconds(); // little back
+       }
+       else
+       {
+@@ -250,6 +259,33 @@ void CatchupController::ClearProgramme()
+   m_programmeChannelTvgShift = 0;
+ }
+ 
++time_t CatchupController::GetTimeResumeLast(int uniqueId = 0)
++{
++  std::string filePathResumeLast = "/tmp/pvr_resumelast";
++  std::string fileContent;
++  	
++  if (!FileUtils::FileExists(filePathResumeLast.c_str()))
++  	return 0;
++
++  FileUtils::GetFileContents(filePathResumeLast, fileContent);
++	return std::stoi(fileContent);
++}
++
++char *CatchupController::ConvertTime(const time_t sec)
++{
++  struct tm *timeinfo;
++  static char buffer[128];
++
++  timeinfo = localtime(&sec);
++  bzero(buffer, sizeof(buffer));
++  snprintf(buffer, sizeof(buffer), "%ld  ", sec);
++  
++  if (sec > 0)
++    strftime(&buffer[strlen(buffer)], sizeof(buffer)-strlen(buffer), "%H:%M:%S %d.%m.%G", timeinfo);
++
++  return buffer;
++}
++
+ namespace
+ {
+ void FormatUnits(time_t tTime, const std::string& name, std::string &urlFormatString)
+diff -aurNp a/src/iptvsimple/CatchupController.h b/src/iptvsimple/CatchupController.h
+--- a/src/iptvsimple/CatchupController.h	2020-07-01 10:52:54.000000000 +0200
++++ b/src/iptvsimple/CatchupController.h	2020-07-01 14:43:51.288332763 +0200
+@@ -51,6 +51,10 @@ namespace iptvsimple
+     void UpdateProgrammeFrom(const data::EpgEntry& epgEntry, int tvgShift);
+     void ClearProgramme();
+ 
++    // resume last
++    time_t GetTimeResumeLast(int);
++    char *ConvertTime(const time_t sec);
++
+     // State of current stream
+     time_t m_catchupStartTime = 0;
+     time_t m_catchupEndTime = 0;

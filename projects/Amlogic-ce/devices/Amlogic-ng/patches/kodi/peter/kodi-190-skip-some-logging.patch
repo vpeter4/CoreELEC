@@ -1,0 +1,34 @@
+--- a/xbmc/InfoScanner.cpp	2018-10-01 17:39:58.145344556 +0200
++++ b/xbmc/InfoScanner.cpp	2018-10-01 17:40:16.452643629 +0200
+@@ -19,7 +19,7 @@ bool CInfoScanner::HasNoMedia(const std:
+ 
+   if (!URIUtils::IsPlugin(strDirectory) && XFILE::CFile::Exists(noMediaFile))
+   {
+-    CLog::Log(LOGWARNING, "Skipping item '%s' with '.nomedia' file in parent directory, it won't be added to the library.", CURL::GetRedacted(strDirectory).c_str());
++    //CLog::Log(LOGWARNING, "Skipping item '%s' with '.nomedia' file in parent directory, it won't be added to the library.", CURL::GetRedacted(strDirectory).c_str());
+     return true;
+   }
+ 
+
+--- a/xbmc/video/VideoInfoScanner.cpp_o	2018-10-02 16:30:37.000000000 +0200
++++ b/xbmc/video/VideoInfoScanner.cpp	2018-10-13 17:53:42.826778964 +0200
+@@ -133,7 +133,7 @@ namespace VIDEO
+            * doesn't exist rather than a NAS being switched off.  A manual clean from settings
+            * will still pick up and remove it though.
+            */
+-          CLog::Log(LOGWARNING, "%s directory '%s' does not exist - skipping scan%s.", __FUNCTION__, CURL::GetRedacted(directory).c_str(), m_bClean ? " and clean" : "");
++          //CLog::Log(LOGWARNING, "%s directory '%s' does not exist - skipping scan%s.", __FUNCTION__, CURL::GetRedacted(directory).c_str(), m_bClean ? " and clean" : "");
+           m_pathsToScan.erase(m_pathsToScan.begin());
+         }
+         else if (!DoScan(directory))
+@@ -465,7 +465,7 @@ namespace VIDEO
+         FoundSomeInfo = true;
+       else if (ret == INFO_NOT_FOUND)
+       {
+-        CLog::Log(LOGWARNING, "No information found for item '%s', it won't be added to the library.", CURL::GetRedacted(pItem->GetPath()).c_str());
++        //CLog::Log(LOGWARNING, "No information found for item '%s', it won't be added to the library.", CURL::GetRedacted(pItem->GetPath()).c_str());
+ 
+         MediaType mediaType = MediaTypeMovie;
+         if (info2->Content() == CONTENT_TVSHOWS)
+
+

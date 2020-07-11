@@ -1,0 +1,30 @@
+remove script.program.driverselect from addons
+
+cp /usr/share/kodi/system/addon-manifest.xml /storage/.kodi/system
+sed -i.bak "/script.program.driverselect/d" /storage/.kodi/system/addon-manifest.xml
+
+kodi-stop
+sqlite3 /storage/.kodi/userdata/Database/Addons27.db "update installed set enabled = 0 where addonID = 'script.program.driverselect';"
+sqlite3 /storage/.kodi/userdata/Database/Addons27.db "select * from installed where addonID = 'script.program.driverselect';"
+kodi-start
+
+--- a/xbmc/addons/AddonManager.cpp	2018-04-17 15:48:35.948839648 +0200
++++ b/xbmc/addons/AddonManager.cpp	2018-04-17 15:49:49.135997509 +0200
+@@ -253,11 +253,12 @@ void CAddonMgr::FillCpluffMetadata(const
+ static bool LoadManifest(std::set<std::string>& system, std::set<std::string>& optional)
+ {
+   CXBMCTinyXML doc;
+-  if (!doc.LoadFile("special://xbmc/system/addon-manifest.xml"))
+-  {
+-    CLog::Log(LOGERROR, "ADDONS: manifest missing");
+-    return false;
+-  }
++  if (!doc.LoadFile("special://home/system/addon-manifest.xml"))
++    if (!doc.LoadFile("special://xbmc/system/addon-manifest.xml"))
++    {
++      CLog::Log(LOGERROR, "ADDONS: manifest missing");
++      return false;
++    }
+ 
+   auto root = doc.RootElement();
+   if (!root || root->ValueStr() != "addons")

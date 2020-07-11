@@ -1,0 +1,16 @@
+--- a/drivers/amlogic/mmc/emmc_partitions.c	2019-08-09 12:29:11.504264807 +0200
++++ b/drivers/amlogic/mmc/emmc_partitions.c	2019-08-09 12:31:46.594342734 +0200
+@@ -941,10 +941,11 @@ static int add_emmc_partition(struct gen
+ 			ret = add_emmc_each_part(disk, 1+i, offset,
+ 					size, 0, pp->name);
+ 
+-			pr_info("[%sp%02d] %20s  offset 0x%012llx, size 0x%012llx %s\n",
++			pr_info("[%sp%02d] %20s  offset 0x%012llx, size 0x%012llx [%5lld MB] %s\n",
+ 					disk->disk_name, 1+i,
+ 					pp->name, offset<<9,
+-					size<<9, IS_ERR(ret) ? "add fail":"");
++					size<<9, (size<<9) / (1024 * 1024),
++					IS_ERR(ret) ? "add fail":"");
+ 		} else {
+ 			pr_info("[%s] %s: partition exceeds device capacity:\n",
+ 					__func__, disk->disk_name);

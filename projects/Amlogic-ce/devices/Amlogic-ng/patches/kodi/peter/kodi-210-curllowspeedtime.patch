@@ -1,0 +1,13 @@
+allow to set with value 0 which means disabled
+
+--- a/xbmc/settings/AdvancedSettings.cpp	2020-05-19 19:48:22.929801296 +0200
++++ b/xbmc/settings/AdvancedSettings.cpp	2020-05-19 19:48:46.724644743 +0200
+@@ -853,7 +853,7 @@ void CAdvancedSettings::ParseSettingsFil
+   if (pElement)
+   {
+     XMLUtils::GetInt(pElement, "curlclienttimeout", m_curlconnecttimeout, 1, 1000);
+-    XMLUtils::GetInt(pElement, "curllowspeedtime", m_curllowspeedtime, 1, 1000);
++    XMLUtils::GetInt(pElement, "curllowspeedtime", m_curllowspeedtime, 0, 1000);
+     XMLUtils::GetInt(pElement, "curlretries", m_curlretries, 0, 10);
+     XMLUtils::GetBoolean(pElement,"disableipv6", m_curlDisableIPV6);
+   }

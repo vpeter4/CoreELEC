@@ -1,0 +1,759 @@
+========================================================================
+rearrange buttons on selected epg channel
+
+from
+  Switch / Play programme / Find similar
+to
+  Play programme / Switch / Find similar
+
+--- a/addons/skin.estuary/xml/DialogPVRInfo.xml	2017-10-19 09:56:10.000000000 +0200
++++ b/addons/skin.estuary/xml/DialogPVRInfo.xml	2017-10-20 15:52:42.000000000 +0200
+@@ -67,16 +67,16 @@
+ 					<ondown>61</ondown>
+ 					<include content="InfoDialogButton">
+ 						<param name="width" value="275" />
+-						<param name="id" value="5" />
+-						<param name="icon" value="icons/infodialogs/launch.png" />
+-						<param name="label" value="$LOCALIZE[19165]" />
++						<param name="id" value="10" />
++						<param name="icon" value="icons/infodialogs/cinema.png" />
++						<param name="label" value="$LOCALIZE[19190]" />
+ 						<param name="visible" value="Window.IsActive(PVRGuideInfo)" />
+ 					</include>
+ 					<include content="InfoDialogButton">
+ 						<param name="width" value="275" />
+-						<param name="id" value="10" />
+-						<param name="icon" value="icons/infodialogs/cinema.png" />
+-						<param name="label" value="$LOCALIZE[19190]" />
++						<param name="id" value="5" />
++						<param name="icon" value="icons/infodialogs/launch.png" />
++						<param name="label" value="$LOCALIZE[19165]" />
+ 						<param name="visible" value="Window.IsActive(PVRGuideInfo)" />
+ 					</include>
+ 					<include content="InfoDialogButton">
+
+
+========================================================================
+remove some icons (recordings, timers, search)
+
+--- a/addons/skin.estuary/xml/Includes_MediaMenu.xml	2017-10-19 09:56:10.000000000 +0200
++++ b/addons/skin.estuary/xml/Includes_MediaMenu.xml	2017-10-20 15:52:42.000000000 +0200
+@@ -97,21 +97,6 @@
+ 							<param name="icon" value="icons/submenu/guide.png" />
+ 						</include>
+ 						<include content="PVRQuickNavItemsCommon">
+-							<param name="control_id" value="102" />
+-							<param name="area" value="Recordings" />
+-							<param name="icon" value="icons/submenu/recordings.png" />
+-						</include>
+-						<include content="PVRQuickNavItemsCommon">
+-							<param name="control_id" value="103" />
+-							<param name="area" value="Timers" />
+-							<param name="icon" value="icons/submenu/timers.png" />
+-						</include>
+-						<include content="PVRQuickNavItemsCommon">
+-							<param name="control_id" value="104" />
+-							<param name="area" value="TimerRules" />
+-							<param name="icon" value="icons/submenu/timer-rules.png" />
+-						</include>
+-						<include content="PVRQuickNavItemsCommon">
+ 							<param name="control_id" value="105" />
+ 							<param name="area" value="Search" />
+ 							<param name="icon" value="icons/submenu/tv-search.png" />
+
+
+========================================================================
+seekbar disappears immediately after resuming a video
+https://forum.kodi.tv/showthread.php?tid=293302&pid=2644962#pid2644962
+ 
+--- a/addons/skin.estuary/xml/DialogSeekBar.xml	2018-07-28 09:39:46.269712777 +0200
++++ b/addons/skin.estuary/xml/DialogSeekBar.xml	2018-07-28 09:40:25.208204317 +0200
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <window>
+-	<visible>Player.Seeking | Player.DisplayAfterSeek | [Player.Paused + !Player.Caching] | Player.Forwarding | Player.Rewinding | Player.ShowInfo | Window.IsActive(fullscreeninfo) | Player.ShowTime | Window.IsActive(videoosd) | Window.IsActive(musicosd) | Window.IsActive(playerprocessinfo) | !String.IsEmpty(Player.SeekNumeric) | !String.IsEmpty(PVR.ChannelNumberInput)</visible>
++	<visible>Player.Seeking |                           [Player.Paused + !Player.Caching] | Player.Forwarding | Player.Rewinding | Player.ShowInfo | Window.IsActive(fullscreeninfo) | Player.ShowTime | Window.IsActive(videoosd) | Window.IsActive(musicosd) | Window.IsActive(playerprocessinfo) | !String.IsEmpty(Player.SeekNumeric) | !String.IsEmpty(PVR.ChannelNumberInput)</visible>
+ 	<visible>![Window.IsActive(sliderdialog) | Window.IsActive(pvrosdchannels) | Window.IsActive(pvrguideinfo)]</visible>
+ 	<visible>Window.IsActive(fullscreenvideo) | Window.IsActive(visualisation)</visible>
+ 	<include>Animation_BottomSlide</include>
+
+
+========================================================================
+move pvr channel list little from top and bottom
+
+--- a/addons/skin.estuary/xml/MyPVRChannels.xml	2018-08-15 19:18:48.000000000 +0200
++++ b/addons/skin.estuary/xml/MyPVRChannels.xml	2018-08-23 14:26:29.000000000 +0200
+@@ -12,9 +12,9 @@
+ 				<include>OpenClose_Left</include>
+ 				<control type="fixedlist" id="50">
+ 					<left>0</left>
+-					<top>list_y_offset</top>
++					<top>80</top>
+ 					<right>918</right>
+-					<bottom>list_y_offset</bottom>
++					<bottom>80</bottom>
+ 					<movement>3</movement>
+ 					<focusposition>5</focusposition>
+ 					<scrolltime tween="cubic" easing="out">500</scrolltime>
+@@ -155,9 +155,9 @@
+ 				</control>
+ 				<control type="fixedlist" id="51">
+ 					<left>0</left>
+-					<top>list_y_offset</top>
++					<top>80</top>
+ 					<right>920</right>
+-					<bottom>list_y_offset</bottom>
++					<bottom>80</bottom>
+ 					<movement>4</movement>
+ 					<focusposition>6</focusposition>
+ 					<scrolltime tween="cubic" easing="out">500</scrolltime>
+@@ -289,9 +289,9 @@
+ 				</include>
+ 				<control type="scrollbar" id="73">
+ 					<left>-50</left>
+-					<top>list_y_offset</top>
++					<top>80</top>
+ 					<width>12</width>
+-					<bottom>list_y_offset</bottom>
++					<bottom>80</bottom>
+ 					<onleft>50</onleft>
+ 					<onright>50</onright>
+ 					<orientation>vertical</orientation>
+
+
+========================================================================
+don't show 'Recenty played channels' on main screen
+
+item 31016
+
+--- a/addons/skin.estuary/xml/Home.xml	2018-09-04 19:25:03.273027623 +0200
++++ b/addons/skin.estuary/xml/Home.xml	2018-09-04 19:25:25.752159938 +0200
+@@ -405,7 +405,7 @@
+ 							<param name="list_id" value="12900"/>
+ 						</include>
+ 
+-						<include content="WidgetListChannels" condition="System.HasPVRAddon">
++						<include content="WidgetListChannels" condition="False">
+ 							<param name="content_path" value="pvr://channels/tv/*?view=lastplayed"/>
+ 							<param name="sortby" value="lastplayed"/>
+ 							<param name="sortorder" value="descending"/>
+
+
+========================================================================
+remove topslide and bottomslide animation
+
+--- a/addons/skin.estuary/xml/Includes_Animations.xml	2018-09-07 19:46:12.000000000 +0200
++++ b/addons/skin.estuary/xml/Includes_Animations.xml	2018-09-08 10:19:55.000000000 +0200
+@@ -54,6 +54,7 @@
+ 		<include condition="!Skin.HasSetting(no_slide_animations)">Vis_FadeSlide_Right</include>
+ 	</include>
+ 	<include name="Animation_TopSlide">
++    <!--
+ 		<animation type="WindowOpen" reversible="False">
+ 			<effect type="fade" start="0" end="100" time="300"/>
+ 			<effect type="slide" start="0,-200" end="0,0" time="300" tween="cubic" easing="out" />
+@@ -62,8 +63,10 @@
+ 			<effect type="fade" start="100" end="0" time="300"/>
+ 			<effect type="slide" start="0,0" end="0,-200" time="300" tween="cubic" easing="out" />
+ 		</animation>
++		-->
+ 	</include>
+ 	<include name="Animation_BottomSlide">
++		<!--
+ 		<animation type="WindowOpen" reversible="False">
+ 			<effect type="fade" start="0" end="100" time="300"/>
+ 			<effect type="slide" start="0,200" end="0,0" time="300" tween="cubic" easing="out" />
+@@ -72,6 +75,7 @@
+ 			<effect type="fade" start="100" end="0" time="300"/>
+ 			<effect type="slide" start="0,0" end="0,200" time="300" tween="cubic" easing="out" />
+ 		</animation>
++		-->
+ 	</include>
+ 	<include name="Vis_FadeSlide_Right">
+ 		<animation type="Visible" reversible="False">
+
+
+========================================================================
+add menu for Video files directly
+move category Videos before Addons
+
+--- a/addons/skin.estuary/xml/Home.xml	2018-09-07 19:46:12.000000000 +0200
++++ b/addons/skin.estuary/xml/Home.xml	2018-09-08 10:19:55.000000000 +0200
+@@ -950,6 +950,21 @@
+ 							<visible>System.GetBool(gamesgeneral.enable) + !Skin.HasSetting(HomeMenuNoGamesButton)</visible>
+ 						</item>
+ 						<item>
++							<label>Video files</label>
++							<onclick>ActivateWindow(Videos,Files,Return)</onclick>
++							<property name="menu_id">$NUMBER[11000]</property>
++							<thumb>icons/sidemenu/videos.png</thumb>
++							<property name="id">video</property>
++						</item>
++						<item>
++							<label>$LOCALIZE[3]</label>
++							<onclick>ActivateWindow(Videos,root)</onclick>
++							<property name="menu_id">$NUMBER[11000]</property>
++							<thumb>icons/sidemenu/videos.png</thumb>
++							<property name="id">video</property>
++							<visible>!Skin.HasSetting(HomeMenuNoVideosButton)</visible>
++						</item>
++						<item>
+ 							<label>$LOCALIZE[24001]</label>
+ 							<property name="menu_id">$NUMBER[8000]</property>
+ 							<onclick>ActivateWindow(1100)</onclick>
+@@ -966,14 +966,6 @@
+ 							<visible>!Skin.HasSetting(HomeMenuNoPicturesButton)</visible>
+ 						</item>
+ 						<item>
+-							<label>$LOCALIZE[3]</label>
+-							<onclick>ActivateWindow(Videos,root)</onclick>
+-							<property name="menu_id">$NUMBER[11000]</property>
+-							<thumb>icons/sidemenu/videos.png</thumb>
+-							<property name="id">video</property>
+-							<visible>!Skin.HasSetting(HomeMenuNoVideosButton)</visible>
+-						</item>
+-						<item>
+ 							<label>$LOCALIZE[10134]</label>
+ 							<onclick>ActivateWindow(favourites)</onclick>
+ 							<property name="menu_id">$NUMBER[14000]</property>
+
+--- a/addons/skin.estuary/xml/Custom_1109_TopBarOverlay.xml	2018-09-08 14:33:23.342163840 +0200
++++ b/addons/skin.estuary/xml/Custom_1109_TopBarOverlay.xml	2018-09-08 14:33:30.405891683 +0200
+@@ -7,7 +7,6 @@
+ 	<zorder>0</zorder>
+ 	<controls>
+ 		<control type="group">
+-			<animation effect="slide" end="0,-90" time="300" tween="sine" easing="inout" condition="$EXP[infodialog_active]">conditional</animation>
+ 			<depth>DepthBars</depth>
+ 			<control type="image">
+ 				<left>0</left>
+
+
+========================================================================
+remove channel number above EPG text
+remove EPG text "No information available"
+
+--- a/addons/skin.estuary/xml/DialogSeekBar.xml	2018-09-08 15:05:07.708416667 +0200
++++ b/addons/skin.estuary/xml/DialogSeekBar.xml	2018-09-08 15:05:23.207813984 +0200
+@@ -231,17 +231,6 @@
+ 			<animation effect="slide" end="0,-20" time="150" condition="VideoPlayer.Content(LiveTV)">conditional</animation>
+ 			<bottom>0</bottom>
+ 			<height>380</height>
+-			<control type="label">
+-				<left>20</left>
+-				<width>220</width>
+-				<top>-80</top>
+-				<height>25</height>
+-				<label>$INFO[VideoPlayer.ChannelNumberLabel]</label>
+-				<shadowcolor>black</shadowcolor>
+-				<align>center</align>
+-				<font>WeatherTemp</font>
+-				<aligny>center</aligny>
+-			</control>
+ 			<control type="image">
+ 				<left>0</left>
+ 				<width>100%</width>
+@@ -261,7 +261,7 @@
+ 				<top>10</top>
+ 				<right>30</right>
+ 				<height>160</height>
+-				<label fallback="19055">$INFO[VideoPlayer.Plot]</label>
++				<label>$INFO[VideoPlayer.Plot]</label>
+ 				<align>justify</align>
+ 				<autoscroll delay="5000" repeat="7500" time="5000"></autoscroll>
+ 				<visible>String.IsEmpty(PVR.EpgEventIcon)</visible>
+
+
+========================================================================
+remove bottom/left "Options" icon and text
+
+--- a/addons/skin.estuary/xml/Includes.xml	2018-09-09 08:34:57.095750441 +0200
++++ b/addons/skin.estuary/xml/Includes.xml	2018-09-09 08:41:16.000000000 +0200
+@@ -1093,18 +1093,6 @@
+ 					<animation effect="fade" time="400">VisibleChange</animation>
+ 					<animation effect="fade" start="0" end="100" time="400">WindowOpen</animation>
+ 					<animation effect="fade" start="100" end="0" time="300">WindowClose</animation>
+-					<control type="button">
+-						<bottom>20</bottom>
+-						<left>12</left>
+-						<width>36</width>
+-						<height>36</height>
+-						<animation effect="rotate" end="-90" center="auto" time="200" reversible="true" condition="Control.IsVisible(51) | Control.IsVisible(53)">Conditional</animation>
+-						<texturefocus colordiffuse="button_focus">frame/menu-nofo.png</texturefocus>
+-						<texturenofocus colordiffuse="FFCCCCCC">frame/menu-nofo.png</texturenofocus>
+-						<animation effect="fade" time="200">VisibleChange</animation>
+-						<onclick>SetFocus(9000)</onclick>
+-						<visible>!Control.IsVisible(6160)</visible>
+-					</control>
+ 					<control type="button" id="6160">
+ 						<bottom>20</bottom>
+ 						<left>12</left>
+@@ -1116,17 +1104,6 @@
+ 						<onclick>SetFocus(9000)</onclick>
+ 						<visible>Window.IsActive(MyPVRGuide.xml)</visible>
+ 					</control>
+-					<control type="button">
+-						<bottom>16</bottom>
+-						<left>64</left>
+-						<width>300</width>
+-						<height>44</height>
+-						<shadowcolor>text_shadow</shadowcolor>
+-						<label>$LOCALIZE[33063]</label>
+-						<onclick>SetFocus(9000)</onclick>
+-						<texturefocus />
+-						<texturenofocus />
+-					</control>
+ 				</control>
+ 				<include>TouchButtons</include>
+ 			</control>
+
+
+========================================================================
+add button "Add to favourites" on EPG window
+
+--- a/addons/skin.estuary/xml/DialogPVRInfo.xml	2018-09-15 16:35:02.000000000 +0200
++++ b/addons/skin.estuary/xml/DialogPVRInfo.xml	2018-09-15 18:10:00.000000000 +0200
+@@ -115,6 +115,15 @@
+ 						<param name="onclick_2" value="RunScript(script.extendedinfo,info=youtubebrowser,id=$INFO[ListItem.Title])" />
+ 						<param name="visible" value="System.hasAddon(script.extendedinfo)" />
+ 					</include>
++					<include content="InfoDialogButton">
++						<param name="width" value="275" />
++						<param name="id" value="10123" />
++						<param name="icon" value="icons/infodialogs/cinema.png" />
++						<param name="label" value="Add to favourites" />
++						<param name="onclick_1" value="Action(close)" />
++						<param name="onclick_2" value="XBMC.RunAddon(service.telemach-eon,addSkinItemToFavourites,$INFO[ListItem.FileNameAndPath],$INFO[ListItem.Date],$INFO[ListItem.Label])" />
++						<param name="visible" value="true" />
++					</include>
+ 				</control>
+ 			</control>
+ 			<include content="InfoDialogTopBarInfo">
+
+========================================================================
+add button "Resume last" on EPG window
+same name as on context menu
+
+--- a/addons/skin.estuary/xml/DialogPVRInfo.xml	2018-09-16 16:35:02.000000000 +0200
++++ b/addons/skin.estuary/xml/DialogPVRInfo.xml	2018-10-03 18:10:00.000000000 +0200
+@@ -117,6 +117,15 @@
+ 					</include>
+ 					<include content="InfoDialogButton">
+ 						<param name="width" value="275" />
++						<param name="id" value="10124" />
++						<param name="icon" value="icons/infodialogs/trailer_search.png" />
++						<param name="label" value="Resume last" />
++						<param name="onclick_1" value="Action(close)" />
++						<param name="onclick_2" value="XBMC.RunAddon(service.telemach-eon, resumeLast, $INFO[ListItem.FileNameAndPath])" />
++						<param name="visible" value="true" />
++					</include>
++					<include content="InfoDialogButton">
++						<param name="width" value="275" />
+ 						<param name="id" value="10123" />
+ 						<param name="icon" value="icons/infodialogs/cinema.png" />
+ 						<param name="label" value="Add to favourites" />
+
+========================================================================
+add new layout for Favourites and change them on Home screen
+
+--- a/addons/skin.estuary/xml/Home.xml	2018-09-09 14:01:49.000000000 +0200
++++ b/addons/skin.estuary/xml/Home.xml	2018-09-16 18:28:56.939767200 +0200
+@@ -527,22 +527,22 @@
+ 						<orientation>vertical</orientation>
+ 						<pagecontrol>14010</pagecontrol>
+ 						<visible>Integer.IsGreater(Container(14100).NumItems,0) | Container(14100).IsUpdating</visible>
+-						<itemlayout width="330" height="401">
++						<itemlayout width="330" height="596">
+ 							<control type="group">
+ 								<top>130</top>
+-								<include content="InfoWallMusicLayout">
++								<include content="InfoWallMusicLayoutFavourites">
+ 									<param name="fallback_image" value="DefaultFavourites.png" />
+ 									<param name="focused" value="false" />
+ 								</include>
+ 							</control>
+ 						</itemlayout>
+-						<focusedlayout width="330" height="401">
++						<focusedlayout width="330" height="596">
+ 							<control type="group">
+ 								<depth>DepthContentPopout</depth>
+ 								<top>130</top>
+ 								<animation effect="zoom" start="100" end="110" time="200" tween="sine" easing="inout" center="170,320">Focus</animation>
+ 								<animation effect="zoom" start="110" end="100" time="200" tween="sine" easing="inout" center="170,320">UnFocus</animation>
+-								<include content="InfoWallMusicLayout">
++								<include content="InfoWallMusicLayoutFavourites">
+ 									<param name="fallback_image" value="DefaultFavourites.png" />
+ 									<param name="focused" value="true" />
+ 								</include>
+--- a/addons/skin.estuary/xml/View_54_InfoWall.xml	2018-09-09 14:01:49.000000000 +0200
++++ b/addons/skin.estuary/xml/View_54_InfoWall.xml	2018-09-16 18:28:19.000000000 +0200
+@@ -119,6 +119,54 @@
+ 			</control>
+ 		</definition>
+ 	</include>
++	<include name="InfoWallMusicLayoutFavourites">
++		<param name="fallback_image">DefaultFolder.png</param>
++		<param name="main_label">$INFO[ListItem.Artist]</param>
++		<param name="sub_label">$INFO[ListItem.Title]</param>
++		<param name="single_label">$INFO[ListItem.Label]</param>
++		<param name="focused">false</param>
++		<definition>
++			<control type="image">
++				<top>0</top>
++				<width>316</width>
++				<height>386</height>
++				<texture>dialogs/dialog-bg-nobo.png</texture>
++				<bordertexture border="21">overlays/shadow.png</bordertexture>
++				<bordersize>20</bordersize>
++			</control>
++			<control type="image">
++				<top>-4</top>
++				<left>-4</left>
++				<width>324</width>
++				<height>394</height>
++				<texture colordiffuse="button_focus">colors/grey.png</texture>
++				<bordertexture border="21">overlays/shadow.png</bordertexture>
++				<bordersize>20</bordersize>
++				<visible>$PARAM[focused]</visible>
++				<include condition="$PARAM[focused]">Animation_FocusTextureFade</include>
++			</control>
++			<control type="image">
++				<left>0</left>
++				<top>0</top>
++				<width>316</width>
++				<height>316</height>
++				<texture fallback="$PARAM[fallback_image]" background="true">$VAR[InfoWallThumbVar]</texture>
++				<aspectratio>keep</aspectratio>
++				<bordersize>20</bordersize>
++			</control>
++			<control type="textbox">
++				<left>28</left>
++				<top>380</top>
++				<width>262</width>
++				<height>200</height>
++				<font>font12</font>
++				<align>center</align>
++				<aligny>top</aligny>
++				<label>$PARAM[single_label]</label>
++				<visible>true</visible>
++			</control>
++		</definition>
++	</include>
+ 	<include name="InfoWallEpisodeLayout">
+ 		<param name="main_label">$INFO[ListItem.Title]</param>
+ 		<param name="sub_label">$INFO[ListItem.TVShowTitle]</param>
+
+
+========================================================================
+always show Timeshift in progress bar (value in bold)
+
+--- a/addons/skin.estuary/xml/Includes_PVR.xml	2018-10-02 16:30:37.000000000 +0200
++++ b/addons/skin.estuary/xml/Includes_PVR.xml	2018-10-20 19:50:22.899843700 +0200
+@@ -135,8 +135,8 @@
+ 					<align>center</align>
+ 					<aligny>center</aligny>
+ 					<font>font13</font>
+-					<label>[B]$LOCALIZE[31026][/B] $INFO[PVR.TimeshiftCur] (-$INFO[PVR.TimeshiftOffset])</label>
+-					<visible>PVR.IsTimeShift</visible>
++					<label>$LOCALIZE[31026] [B]$INFO[PVR.TimeshiftCur][/B] (-$INFO[PVR.TimeshiftOffset])</label>
++					<visible>true</visible>
+ 				</control>
+ 			</control>
+ 			<control type="group">
+
+
+========================================================================
+some PVR colors
+
+--- a/addons/skin.estuary/xml/Includes_PVR.xml	2019-02-02 22:15:26.000000000 +0100
++++ b/addons/skin.estuary/xml/Includes_PVR.xml	2019-04-18 13:21:29.000000000 +0200
+@@ -208,6 +208,7 @@
+ 					<height>262</height>
+ 					<font>font45</font>
+ 					<label>$INFO[ListItem.ChannelName]</label>
++					<textcolor>yellow</textcolor>
+ 				</control>
+ 				<control type="label">
+ 					<top>60</top>
+@@ -247,6 +248,7 @@
+ 				<height>262</height>
+ 				<font>font36_title</font>
+ 				<label>$INFO[ListItem.Title] $INFO[ListItem.Year,([COLOR grey],[/COLOR])]</label>
++				<textcolor>lime</textcolor>
+ 				<visible>!PVR.HasEpg</visible>
+ 			</control>
+ 			<control type="label">
+
+
+--- a/addons/skin.estuary/xml/MyPVRChannels.xml	2019-02-02 22:15:26.000000000 +0100
++++ b/addons/skin.estuary/xml/MyPVRChannels.xml	2019-04-18 13:22:13.000000000 +0200
+@@ -68,6 +68,7 @@
+ 							<font>font14</font>
+ 							<animation effect="slide" start="0,0" end="0,14" time="0" condition="String.IsEmpty(ListItem.Title)">Conditional</animation>
+ 							<label>$INFO[ListItem.Label]</label>
++							<textcolor>white</textcolor>
+ 							<shadowcolor>text_shadow</shadowcolor>
+ 						</control>
+ 						<control type="label">
+@@ -78,6 +79,7 @@
+ 							<aligny>top</aligny>
+ 							<font>font12</font>
+ 							<label>$INFO[ListItem.Title]</label>
++							<textcolor>lime</textcolor>
+ 							<shadowcolor>text_shadow</shadowcolor>
+ 						</control>
+ 						<control type="label">
+@@ -125,6 +127,7 @@
+ 							<aligny>top</aligny>
+ 							<font>font14</font>
+ 							<label>$INFO[ListItem.Label]</label>
++							<textcolor>yellow</textcolor>
+ 							<animation effect="slide" start="0,0" end="0,14" time="0" condition="String.IsEmpty(ListItem.Title)">Conditional</animation>
+ 							<shadowcolor>text_shadow</shadowcolor>
+ 						</control>
+@@ -137,7 +140,7 @@
+ 							<font>font12</font>
+ 							<label>$INFO[ListItem.Title]</label>
+ 							<shadowcolor>text_shadow</shadowcolor>
+-							<textcolor>grey</textcolor>
++							<textcolor>white</textcolor>
+ 						</control>
+ 						<control type="label">
+ 							<left>10</left>
+
+
+========================================================================
+hide has archive green icon in TV channels
+
+#		--- a/addons/skin.estuary/xml/Variables.xml	2019-07-20 15:39:38.210829400 +0200
+#		+++ b/addons/skin.estuary/xml/Variables.xml	2019-07-20 15:41:43.430521645 +0200
+#		@@ -3,7 +3,7 @@
+#		 	<variable name="PVRStatusImageVar">
+#		 		<value condition="ListItem.IsRecording">windows/pvr/record.png</value>
+#		 		<value condition="ListItem.HasTimer | ListItem.HasTimerSchedule">windows/pvr/timer.png</value>
+#		-		<value condition="ListItem.HasArchive">windows/pvr/archive.png</value>
+#		+		<value condition="false">windows/pvr/archive.png</value>
+#		 	</variable>
+#		 	<variable name="AutoCompletionContentVar">
+#		 		<value condition="System.HasAddon(plugin.program.autocompletion) + !System.HasHiddenInput">plugin://plugin.program.autocompletion?info=autocomplete&amp;&amp;id=$INFO[Control.GetLabel(312).index(1)]&amp;&amp;limit=9</value>
+#		@@ -339,7 +339,7 @@
+#		 		<value condition="ListItem.IsCollection">overlays/set.png</value>
+#		 		<value condition="ListItem.IsPlaying">overlays/watched/OverlayPlaying-List.png</value>
+#		 		<value condition="ListItem.IsResumable">overlays/watched/resume.png</value>
+#		-		<value condition="ListItem.HasArchive">windows/pvr/archive.png</value>
+#		+		<value condition="false">windows/pvr/archive.png</value>
+#		 		<value condition="Integer.IsGreater(ListItem.Playcount,0)">$INFO[ListItem.Overlay]</value>
+#		 	</variable>
+#		 	<!-- Breadcrumbs -->
+#		@@ -431,7 +431,7 @@
+#		 		<value condition="ListItem.HasTimer + !ListItem.TimerIsActive">icons/pvr/PVR-HasTimerDisabled.png</value>
+#		 		<value condition="ListItem.HasTimerSchedule">icons/pvr/PVR-HasTimerSchedule.png</value>
+#		 		<value condition="ListItem.HasTimer">icons/pvr/PVR-HasTimer.png</value>
+#		-		<value condition="ListItem.IsPlayable">icons/pvr/PVR-HasArchive.png</value>
+#		+		<value condition="false">icons/pvr/PVR-HasArchive.png</value>
+#		 	</variable>
+#		 	<variable name="SeasonEpisodeLabel">
+#		 		<value condition="String.IsEmpty(ListItem.EpisodeName)">$INFO[ListItem.Season,S]$INFO[ListItem.Episode,E]</value>
+
+
+========================================================================
+rearange Codec Info menu
+
+--- a/addons/skin.estuary/xml/DialogPlayerProcessInfo.xml	2019-07-21 16:58:30.000000000 +0200
++++ b/addons/skin.estuary/xml/DialogPlayerProcessInfo.xml	2019-07-06 22:03:19.000000000 +0200
+@@ -237,18 +237,18 @@
+ 				<onup>Close</onup>
+ 				<ondown>Close</ondown>
+ 				<usecontrolcoords>true</usecontrolcoords>
+-				<control type="button" id="5551">
++				<control type="button" id="5552">
+ 					<width>auto</width>
+ 					<height>100</height>
+ 					<textoffsetx>40</textoffsetx>
+-					<label>$LOCALIZE[31137]</label>
+-					<visible>VideoPlayer.Content(livetv)</visible>
++					<label>$LOCALIZE[31138]</label>
+ 				</control>
+-				<control type="button" id="5552">
++				<control type="button" id="5551">
+ 					<width>auto</width>
+ 					<height>100</height>
+ 					<textoffsetx>40</textoffsetx>
+-					<label>$LOCALIZE[31138]</label>
++					<label>$LOCALIZE[31137]</label>
++					<visible>VideoPlayer.Content(livetv)</visible>
+ 				</control>
+ 			</control>
+ 		</control>
+
+
+========================================================================
+add my temperatures
+
+--- a/addons/skin.estuary/xml/Custom_1109_TopBarOverlay.xml	2019-08-01 10:03:00.000000000 +0200
++++ b/addons/skin.estuary/xml/Custom_1109_TopBarOverlay.xml	2019-07-21 16:20:30.000000000 +0200
+@@ -1,5 +1,6 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <window type="dialog" id="1109">
++  <onload>RunScript(script.home.temperatures)</onload>
+ 	<visible>Window.IsActive(fullscreenvideo) | Window.IsActive(visualisation)</visible>
+ 	<visible>Window.IsActive(seekbar) | Window.IsActive(pvrosdchannels) | Window.IsActive(pvrchannelguide)</visible>
+ 	<depth>DepthOSD</depth>
+@@ -107,6 +108,73 @@
+ 						<visible>Player.Muted</visible>
+ 					</control>
+ 				</control>
++        <control type="grouplist">
++          <left>1400</left>
++          <top>204</top>
++          <control type="label">
++            <width>500</width>
++            <height>50</height>
++            <align>right</align>
++            <aligny>bottom</aligny>
++            <label>[COLOR blue]$INFO[Window(10000).Property(home.temperatures.cpu)] [/COLOR]</label>
++            <font>font27</font>
++            <shadowcolor>black</shadowcolor>
++          </control>
++          <control type="label">
++            <width>500</width>
++            <height>50</height>
++            <align>right</align>
++            <aligny>bottom</aligny>
++            <label>[COLOR blue]$INFO[Window(10000).Property(home.temperatures.becan)] [/COLOR]</label>
++            <font>font27</font>
++            <shadowcolor>black</shadowcolor>
++          </control>
++          <control type="label">
++            <width>500</width>
++            <height>50</height>
++            <align>right</align>
++            <aligny>bottom</aligny>
++            <label>[COLOR blue]$INFO[Window(10000).Property(home.temperatures.t3)] [/COLOR]</label>
++            <font>font27</font>
++            <shadowcolor>black</shadowcolor>
++          </control>
++          <control type="label">
++            <width>500</width>
++            <height>50</height>
++            <align>right</align>
++            <aligny>bottom</aligny>
++            <label>[COLOR blue]$INFO[Window(10000).Property(home.temperatures.t2)] [/COLOR]</label>
++            <font>font27</font>
++            <shadowcolor>black</shadowcolor>
++          </control>
++          <control type="label">
++            <width>500</width>
++            <height>50</height>
++            <align>right</align>
++            <aligny>bottom</aligny>
++            <label>[COLOR blue]$INFO[Window(10000).Property(home.temperatures.t1)] [/COLOR]</label>
++            <font>font27</font>
++            <shadowcolor>black</shadowcolor>
++          </control>
++          <control type="label">
++            <width>500</width>
++            <height>50</height>
++            <align>right</align>
++            <aligny>bottom</aligny>
++            <label>[COLOR blue]$INFO[Window(10000).Property(home.temperatures.w1-1)] [/COLOR]</label>
++            <font>font27</font>
++            <shadowcolor>black</shadowcolor>
++          </control>
++          <control type="label">
++            <width>500</width>
++            <height>50</height>
++            <align>right</align>
++            <aligny>bottom</aligny>
++            <label>[COLOR blue]$INFO[Window(10000).Property(home.temperatures.w1-2)] [/COLOR]</label>
++            <font>font27</font>
++            <shadowcolor>black</shadowcolor>
++          </control>
++        </control>
+ 			</control>
+ 		</control>
+ 	</controls>
+
+
+========================================================================
+disable skin effects or make them faster
+
+ faster:   effectslowdown="0.25"
+disable:   effectslowdown="0.00"
+
+--- a/addons/skin.estuary/addon.xml	2019-07-06 22:03:19.000000000 +0200
++++ b/addons/skin.estuary/addon.xml	2019-08-01 17:19:43.982538818 +0200
+@@ -3,7 +3,7 @@
+ 	<requires>
+ 		<import addon="xbmc.gui" version="5.14.0"/>
+ 	</requires>
+-	<extension point="xbmc.gui.skin" debugging="false">
++	<extension point="xbmc.gui.skin" debugging="false" effectslowdown="0.25">
+ 		<res width="1920" height="1440" aspect="4:3" default="false" folder="xml" />
+ 		<res width="1920" height="1280" aspect="3:2" default="false" folder="xml" />
+ 		<res width="1920" height="1200" aspect="16:10" default="false" folder="xml" />
+
+
+========================================================================
+remove loading percentage icon in center of the screen when tv channel is loading
+
+--- a/addons/skin.estuary/xml/VideoFullScreen.xml	2019-08-11 09:48:30.723224832 +0200
++++ b/addons/skin.estuary/xml/VideoFullScreen.xml	2019-08-11 09:48:56.878210200 +0200
+@@ -40,38 +40,6 @@
+ 			<width>110</width>
+ 			<centertop>50%</centertop>
+ 			<height>110</height>
+-			<control type="image" id="1">
+-				<centerleft>50%</centerleft>
+-				<centertop>50%</centertop>
+-				<width>110</width>
+-				<height>110</height>
+-				<texture colordiffuse="BFFFFFFF">osd/buffer-bg.png</texture>
+-			</control>
+-			<control type="image" id="1">
+-				<centerleft>50%</centerleft>
+-				<centertop>50%</centertop>
+-				<width>92</width>
+-				<height>92</height>
+-				<texture>dialogs/extendedprogress/loading-back.png</texture>
+-			</control>
+-			<control type="image" id="1">
+-				<centerleft>50%</centerleft>
+-				<centertop>50%</centertop>
+-				<width>92</width>
+-				<height>92</height>
+-				<texture colordiffuse="button_focus">$INFO[Player.CacheLevel,dialogs/volume/progress/p,.png]</texture>
+-			</control>
+-			<control type="label" id="1">
+-				<description>buffering value</description>
+-				<label>$INFO[Player.CacheLevel]</label>
+-				<centerleft>50%</centerleft>
+-				<centertop>50%</centertop>
+-				<width>200</width>
+-				<height>200</height>
+-				<aligny>center</aligny>
+-				<align>center</align>
+-				<font>font13</font>
+-			</control>
+ 		</control>
+ 	</controls>
+ </window>
+
+
+========================================================================
+Dim screensaver time from 1sec to 100ms
+
+--- a/xbmc/windows/GUIWindowScreensaverDim.cpp	2019-09-19 20:33:46.000000000 +0200
++++ b/xbmc/windows/GUIWindowScreensaverDim.cpp	2019-09-21 10:24:46.252059688 +0200
+@@ -19,8 +19,8 @@ CGUIWindowScreensaverDim::CGUIWindowScre
+   : CGUIDialog(WINDOW_SCREENSAVER_DIM, "", DialogModalityType::MODELESS)
+ {
+   m_needsScaling = false;
+-  m_animations.push_back(CAnimation::CreateFader(0, 100, 0, 1000, ANIM_TYPE_WINDOW_OPEN));
+-  m_animations.push_back(CAnimation::CreateFader(100, 0, 0, 1000, ANIM_TYPE_WINDOW_CLOSE));
++  m_animations.push_back(CAnimation::CreateFader(0, 100, 0, 100, ANIM_TYPE_NONE));
++  m_animations.push_back(CAnimation::CreateFader(100, 0, 0, 100, ANIM_TYPE_NONE));  
+   m_renderOrder = RENDER_ORDER_WINDOW_SCREENSAVER;
+ }
+ 
+

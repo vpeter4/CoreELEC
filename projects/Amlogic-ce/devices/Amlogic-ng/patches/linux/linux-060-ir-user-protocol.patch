@@ -1,0 +1,33 @@
+[   14.976497@4] meson-remote ff808040.meson-remote: protocol = 0x5
+
+meson-remote.protocol=5
+
+/etc/modprobe.d/meson-remote.conf
+# set protocol to RC6
+options meson-remote protocol=5
+
+
+--- a/drivers/amlogic/input/remote/remote_meson.c   2020-06-04 09:03:16.156779406 +0200
++++ b/drivers/amlogic/input/remote/remote_meson.c   2020-06-04 09:09:23.376022821 +0200
+@@ -43,6 +43,10 @@
+ #include <linux/pm_wakeirq.h>
+ #include <linux/amlogic/scpi_protocol.h>
+ 
++static int protocol = -1;
++module_param(protocol, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
++MODULE_PARM_DESC(protocol, "Infrared remote control protocol");
++
+ static void amlremote_tasklet(unsigned long data);
+ static void learning_done_workqueue(struct work_struct *work);
+ static void get_fifo_data_work(struct work_struct *work);
+@@ -628,6 +632,10 @@ static int ir_get_devtree_pdata(struct p
+ 		dev_err(chip->dev, "don't find the node <protocol>\n");
+ 		chip->protocol = 1;
+ 	}
++
++	if (protocol > -1)
++		chip->protocol = protocol;
++
+ 	dev_info(chip->dev, "protocol = 0x%x\n", chip->protocol);
+ 
+ 	ret = of_property_read_u32(pdev->dev.of_node,

@@ -1,0 +1,349 @@
+From aa6c38c34373b2ca3a8c39e564691ec9562f3433 Mon Sep 17 00:00:00 2001
+From: phunkyfish <phunkyfish@gmail.com>
+Date: Tue, 30 Jun 2020 22:20:08 +0100
+Subject: [PATCH 1/2] Add fast open for manifest stream and test setting for
+ realtime off
+
+---
+ README.md                                     |  2 ++
+ .../resource.language.en_gb/strings.po        | 32 +++++++++++++++----
+ .../resources/settings.xml                    | 10 ++++++
+ src/StreamManager.cpp                         |  2 +-
+ src/stream/FFmpegCatchupStream.cpp            | 12 +++++--
+ src/stream/FFmpegCatchupStream.h              |  3 +-
+ src/stream/FFmpegStream.cpp                   | 30 ++++++++++-------
+ src/stream/FFmpegStream.h                     |  7 ++--
+ src/stream/TimeshiftStream.cpp                |  4 +--
+ src/stream/TimeshiftStream.h                  |  2 +-
+ 10 files changed, 76 insertions(+), 28 deletions(-)
+
+diff --git a/README.md b/README.md
+index e19f34f..69bc71e 100644
+--- a/README.md
++++ b/README.md
+@@ -82,6 +82,8 @@ This category contains the advanced settings for the addon.
+ * **Allow FFmpeg logging**: If enabled the addon will log any FFmpeg logging to the Kodi log.
+ * **Probe for FPS**: Probe for frames per second. Default enabled. If disabled the value returned by the codec will be used.
+ * **Enable teletext**: Allow teletext. Default enabled.
++* **Use fast open for streams using a manifest file**: Streams which have a manifest file (e.g. HLD/DASH/Smooth Streaming) can be opened more quickly with FFmpeg with this option enabled.
++* **For catchup streams report stream is not realtime**: For certain catchup streams such as HLS reporting that a live stream is not live can improve stream open times. If testing this option works for a catchup stream/provider, then add a `#KODIPROP=inputstream.ffmpegdirect.is_realtime_stream=false` to the M3U entry in question. This setting should not be left enabled for all streams.
+ 
+ ## Using the addon
+ 
+diff --git a/inputstream.ffmpegdirect/resources/language/resource.language.en_gb/strings.po b/inputstream.ffmpegdirect/resources/language/resource.language.en_gb/strings.po
+index e8adf33..c0429e5 100644
+--- a/inputstream.ffmpegdirect/resources/language/resource.language.en_gb/strings.po
++++ b/inputstream.ffmpegdirect/resources/language/resource.language.en_gb/strings.po
+@@ -115,7 +115,17 @@ msgctxt "#30044"
+ msgid "Enable teletext"
+ msgstr ""
+ 
+-#empty strings from id 30045 to 30599
++#. help: Advanced - useFastOpemForManifestStreams
++msgctxt "#30045"
++msgid "Use fast open for streams using a manifest file"
++msgstr ""
++
++#. help: Advanced - forceRealtimeOffCatchup
++msgctxt "#30046"
++msgid "For catchup streams report stream is not realtime"
++msgstr ""
++
++#empty strings from id 30047 to 30599
+ 
+ #. ############
+ #. help info #
+@@ -174,7 +184,7 @@ msgstr ""
+ 
+ #. help: Timeshift - timeshiftEnableLimit
+ msgctxt "#30622"
+-msgid "Enable this option to limit the length of the timeshift buffer. If disabled the buffer will grow forever until playback is stopped. Reagrdless of this setting the buffer will also grow forever if paused."
++msgid "Enable this option to limit the length of the timeshift buffer. If disabled the buffer will grow forever until playback is stopped. Regardless of this setting the buffer will also grow forever if paused."
+ msgstr ""
+ 
+ #. help: Timeshift - timeshiftOnDiskLength
+@@ -188,20 +198,30 @@ msgstr ""
+ 
+ #. help-category: advanced
+ msgctxt "#30640"
+-msgid "Enable this option to limit the length of the timeshift buffer. If disabled the buffer will grow forever until playback is stopped. Reagrdless of this setting the buffer will also grow forever if paused."
++msgid "Advanced settings"
+ msgstr ""
+ 
+-#. help: Timeshift - allowFFmpegLogging
++#. help: Advanced - allowFFmpegLogging
+ msgctxt "#30641"
+ msgid "If enabled the addon will log any FFmpeg logging to the Kodi log."
+ msgstr ""
+ 
+-#. help: Timeshift - probeForFps
++#. help: Advanced - probeForFps
+ msgctxt "#30642"
+ msgid "Probe for frames per second. Default enabled. If disabled the value returned by the codec will be used."
+ msgstr ""
+ 
+-#. help: Timeshift - enableTeletext
++#. help: Advanced - enableTeletext
+ msgctxt "#30643"
+ msgid "Allow teletext. Default enabled."
+ msgstr ""
++
++#. help: Advanced - useFastOpenForManifestStreams
++msgctxt "#30644"
++msgid "Streams which have a manifest file (e.g. HLD/DASH/Smooth Streaming) can be opened more quickly with FFmpeg with this option enabled."
++msgstr ""
++
++#. help: Advanced - forceRealtimeOffCatchup
++msgctxt "#30645"
++msgid "For certain catchup streams such as HLS reporting that a live stream is not live can improve stream open times. If testing this option works for a catchup stream/provider, then add a `#KODIPROP=inputstream.ffmpegdirect.is_realtime_stream=false` to the M3U entry in question. This setting should not be left enabled for all streams."
++msgstr ""
+diff --git a/inputstream.ffmpegdirect/resources/settings.xml b/inputstream.ffmpegdirect/resources/settings.xml
+index d490dfb..bcde0be 100644
+--- a/inputstream.ffmpegdirect/resources/settings.xml
++++ b/inputstream.ffmpegdirect/resources/settings.xml
+@@ -130,6 +130,16 @@
+           <default>true</default>
+           <control type="toggle" />
+         </setting>
++        <setting id="useFastOpenForManifestStreams" type="boolean" label="30045" help="30644">
++          <level>2</level>
++          <default>true</default>
++          <control type="toggle" />
++        </setting>
++        <setting id="forceRealtimeOffCatchup" type="boolean" label="30046" help="30645">
++          <level>2</level>
++          <default>false</default>
++          <control type="toggle" />
++        </setting>
+       </group>
+     </category>
+   </section>
+diff --git a/src/StreamManager.cpp b/src/StreamManager.cpp
+index 6a760a6..18c0d23 100644
+--- a/src/StreamManager.cpp
++++ b/src/StreamManager.cpp
+@@ -202,7 +202,7 @@ bool InputStreamFFmpegDirect::Open(INPUTSTREAM& props)
+   else if (properties.m_streamMode == StreamMode::TIMESHIFT)
+     m_stream = std::make_shared<TimeshiftStream>(static_cast<IManageDemuxPacket*>(this), properties, httpProxy);
+   else
+-    m_stream = std::make_shared<FFmpegStream>(static_cast<IManageDemuxPacket*>(this), properties.m_openMode, httpProxy);
++    m_stream = std::make_shared<FFmpegStream>(static_cast<IManageDemuxPacket*>(this), properties, httpProxy);
+ 
+   m_stream->SetVideoResolution(m_videoWidth, m_videoHeight);
+ 
+diff --git a/src/stream/FFmpegCatchupStream.cpp b/src/stream/FFmpegCatchupStream.cpp
+index 5cf9719..da23394 100644
+--- a/src/stream/FFmpegCatchupStream.cpp
++++ b/src/stream/FFmpegCatchupStream.cpp
+@@ -45,9 +45,9 @@ using namespace ffmpegdirect;
+ ***********************************************************/
+ 
+ FFmpegCatchupStream::FFmpegCatchupStream(IManageDemuxPacket* demuxPacketManager,
+-                                         const Properties props,
++                                         const Properties& props,
+                                          const HttpProxy& httpProxy)
+-  : FFmpegStream(demuxPacketManager, props.m_openMode, std::make_shared<CurlCatchupInput>(), httpProxy),
++  : FFmpegStream(demuxPacketManager, props, std::make_shared<CurlCatchupInput>(), httpProxy),
+     m_isOpeningStream(false), m_seekOffset(0),
+     m_defaultUrl(props.m_defaultUrl), m_playbackAsLive(props.m_playbackAsLive),
+     m_programmeStartTime(props.m_programmeStartTime), m_programmeEndTime(props.m_programmeEndTime),
+@@ -370,6 +370,14 @@ void FFmpegCatchupStream::UpdateCurrentPTS()
+     m_currentPts += m_seekOffset;
+ }
+ 
++bool FFmpegCatchupStream::IsRealTimeStream()
++{
++  if (kodi::GetSettingBoolean("forceRealtimeOffCatchup"))
++    return false;
++
++  return m_isRealTimeStream && m_pFormatContext->duration <= 0;
++}
++
+ namespace
+ {
+ 
+diff --git a/src/stream/FFmpegCatchupStream.h b/src/stream/FFmpegCatchupStream.h
+index a6f8865..048fac3 100644
+--- a/src/stream/FFmpegCatchupStream.h
++++ b/src/stream/FFmpegCatchupStream.h
+@@ -22,7 +22,7 @@ class FFmpegCatchupStream : public FFmpegStream
+ {
+ public:
+   FFmpegCatchupStream(IManageDemuxPacket* demuxPacketManager,
+-                      const Properties props,
++                      const Properties& props,
+                       const HttpProxy& httpProxy);
+   ~FFmpegCatchupStream();
+ 
+@@ -40,6 +40,7 @@ class FFmpegCatchupStream : public FFmpegStream
+   int64_t SeekCatchupStream(double timeMs, bool backwards);
+   virtual int64_t LengthStream() override;
+   virtual bool GetTimes(INPUTSTREAM_TIMES& times) override;
++  virtual bool IsRealTimeStream() override;
+ 
+ protected:
+   void UpdateCurrentPTS() override;
+diff --git a/src/stream/FFmpegStream.cpp b/src/stream/FFmpegStream.cpp
+index b257dd5..8987bcc 100644
+--- a/src/stream/FFmpegStream.cpp
++++ b/src/stream/FFmpegStream.cpp
+@@ -98,14 +98,15 @@ static int64_t dvd_file_seek(void* h, int64_t pos, int whence)
+     return curlInput->Seek(pos, whence & ~AVSEEK_FORCE);
+ }
+ 
+-FFmpegStream::FFmpegStream(IManageDemuxPacket* demuxPacketManager, const OpenMode& openMode, const HttpProxy& httpProxy)
+-  : FFmpegStream(demuxPacketManager, openMode, std::make_shared<CurlInput>(), httpProxy)
++FFmpegStream::FFmpegStream(IManageDemuxPacket* demuxPacketManager, const Properties& props, const HttpProxy& httpProxy)
++  : FFmpegStream(demuxPacketManager, props, std::make_shared<CurlInput>(), httpProxy)
+ {
+ }
+ 
+-FFmpegStream::FFmpegStream(IManageDemuxPacket* demuxPacketManager, const OpenMode& openMode, std::shared_ptr<CurlInput> curlInput, const HttpProxy& httpProxy)
++FFmpegStream::FFmpegStream(IManageDemuxPacket* demuxPacketManager, const Properties& props, std::shared_ptr<CurlInput> curlInput, const HttpProxy& httpProxy)
+   : BaseStream(demuxPacketManager),
+-    m_openMode(openMode),
++    m_openMode(props.m_openMode),
++    m_manifestType(props.m_manifestType),
+     m_curlInput(curlInput),
+     m_httpProxy(httpProxy),
+     m_paused(false)
+@@ -901,18 +902,23 @@ bool FFmpegStream::OpenWithFFmpeg(AVInputFormat* iformat, const AVIOInterruptCB&
+   }
+   if (result < 0)
+   {
+-    m_pFormatContext->flags |= AVFMT_FLAG_PRIV_OPT;
+-    if (avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0)
++    // We only process this condition for manifest streams when this setting is disabled
++    if (!kodi::GetSettingBoolean("useFastOpenForManifestStreams") || m_manifestType.empty())
+     {
+-      Log(LOGLEVEL_DEBUG, "Error, could not open file %s", CURL::GetRedacted(strFile).c_str());
+-      Dispose();
++      m_pFormatContext->flags |= AVFMT_FLAG_PRIV_OPT;
++      if (avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0)
++      {
++        Log(LOGLEVEL_DEBUG, "Error, could not open file %s", CURL::GetRedacted(strFile).c_str());
++        Dispose();
++        av_dict_free(&options);
++        return false;
++      }
++
+       av_dict_free(&options);
+-      return false;
++      avformat_close_input(&m_pFormatContext);
++      m_pFormatContext = avformat_alloc_context();
+     }
+ 
+-    av_dict_free(&options);
+-    avformat_close_input(&m_pFormatContext);
+-    m_pFormatContext = avformat_alloc_context();
+     m_pFormatContext->interrupt_callback = int_cb;
+     m_pFormatContext->flags &= ~AVFMT_FLAG_PRIV_OPT;
+     options = GetFFMpegOptionsFromInput();
+diff --git a/src/stream/FFmpegStream.h b/src/stream/FFmpegStream.h
+index ab52281..6dddc6a 100644
+--- a/src/stream/FFmpegStream.h
++++ b/src/stream/FFmpegStream.h
+@@ -60,8 +60,8 @@ class FFmpegStream
+   : public BaseStream
+ {
+ public:
+-  FFmpegStream(IManageDemuxPacket* demuxPacketManager, const OpenMode& openMode, const HttpProxy& httpProxy);
+-  FFmpegStream(IManageDemuxPacket* demuxPacketManager, const OpenMode& openMode, std::shared_ptr<CurlInput> curlInput, const HttpProxy& httpProxy);
++  FFmpegStream(IManageDemuxPacket* demuxPacketManager, const Properties& props, const HttpProxy& httpProxy);
++  FFmpegStream(IManageDemuxPacket* demuxPacketManager, const Properties& props, std::shared_ptr<CurlInput> curlInput, const HttpProxy& httpProxy);
+   ~FFmpegStream();
+ 
+   virtual bool Open(const std::string& streamUrl, const std::string& mimeType, bool isRealTimeStream, const std::string& programProperty) override;
+@@ -116,6 +116,7 @@ class FFmpegStream
+   bool m_demuxResetOpenSuccess = false;
+   std::string m_streamUrl;
+   int m_lastPacketResult;
++  bool m_isRealTimeStream;
+ 
+ private:
+   bool Open(bool fileinfo);
+@@ -191,7 +192,7 @@ class FFmpegStream
+ 
+   std::string m_mimeType;
+   std::string m_programProperty;
+-  bool m_isRealTimeStream;
++  std::string m_manifestType;
+   bool m_opened;
+ 
+   HttpProxy m_httpProxy;
+diff --git a/src/stream/TimeshiftStream.cpp b/src/stream/TimeshiftStream.cpp
+index 6d1a385..b102930 100644
+--- a/src/stream/TimeshiftStream.cpp
++++ b/src/stream/TimeshiftStream.cpp
+@@ -24,9 +24,9 @@
+ using namespace ffmpegdirect;
+ 
+ TimeshiftStream::TimeshiftStream(IManageDemuxPacket* demuxPacketManager,
+-                                 const Properties props,
++                                 const Properties& props,
+                                  const HttpProxy& httpProxy)
+-  : FFmpegStream(demuxPacketManager, props.m_openMode, httpProxy)
++  : FFmpegStream(demuxPacketManager, props, httpProxy)
+ {
+   std::random_device randomDevice; //Will be used to obtain a seed for the random number engine
+   m_randomGenerator = std::mt19937(randomDevice()); //Standard mersenne_twister_engine seeded with randomDevice()
+diff --git a/src/stream/TimeshiftStream.h b/src/stream/TimeshiftStream.h
+index 207dcd3..1b1bff6 100644
+--- a/src/stream/TimeshiftStream.h
++++ b/src/stream/TimeshiftStream.h
+@@ -28,7 +28,7 @@ class TimeshiftStream
+ {
+ public:
+   TimeshiftStream(IManageDemuxPacket* demuxPacketManager,
+-                  const Properties props,
++                  const Properties& props,
+                   const HttpProxy& httpProxy);
+   ~TimeshiftStream();
+ 
+
+From d5b4068105bef3950886112c89d2c83edd3c1d4e Mon Sep 17 00:00:00 2001
+From: phunkyfish <phunkyfish@gmail.com>
+Date: Tue, 30 Jun 2020 22:26:25 +0100
+Subject: [PATCH 2/2] changelog and version v1.15.0
+
+---
+ inputstream.ffmpegdirect/addon.xml.in  | 6 +++++-
+ inputstream.ffmpegdirect/changelog.txt | 4 ++++
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/inputstream.ffmpegdirect/addon.xml.in b/inputstream.ffmpegdirect/addon.xml.in
+index 064da8b..391a141 100644
+--- a/inputstream.ffmpegdirect/addon.xml.in
++++ b/inputstream.ffmpegdirect/addon.xml.in
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <addon
+   id="inputstream.ffmpegdirect"
+-  version="1.14.5"
++  version="1.15.0"
+   name="Inputstream FFmpeg Direct"
+   provider-name="Ross Nicholson">
+   <requires>@ADDON_DEPENDS@</requires>
+@@ -24,6 +24,10 @@
+       <fanart>fanart.jpg</fanart>
+     </assets>
+     <news>
++v1.15.0
++- Added: Add fast open for manifest stream and test setting for realtime off
++- Fixed: Honour realtime stream property
++
+ v1.14.5
+ - Fixed: Fix lintian spellings and mimetype log statement
+ - Update: Readme
+diff --git a/inputstream.ffmpegdirect/changelog.txt b/inputstream.ffmpegdirect/changelog.txt
+index 0d7b7f8..872ffa0 100644
+--- a/inputstream.ffmpegdirect/changelog.txt
++++ b/inputstream.ffmpegdirect/changelog.txt
+@@ -1,3 +1,7 @@
++v1.15.0
++- Added: Add fast open for manifest stream and test setting for realtime off
++- Fixed: Honour realtime stream property
++
+ v1.14.5
+ - Fixed: Fix lintian spellings and mimetype log statement
+ - Update: Readme

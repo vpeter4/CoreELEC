@@ -1,0 +1,42 @@
+From dc35da16a2e23db04822f0129cd5b28b7b0e72b4 Mon Sep 17 00:00:00 2001
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Date: Mon, 19 Mar 2018 20:26:09 +0900
+Subject: [PATCH] lib: zstd: clean up Makefile for simpler composite object
+ handling
+
+Now, Kbuild nicely handles composite objects to avoid multiple
+definition.
+
+Makefiles can simply add the same objects multiple times across
+composite objects.
+
+Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+---
+ lib/zstd/Makefile | 17 ++++-------------
+ 1 file changed, 4 insertions(+), 13 deletions(-)
+
+diff --git a/lib/zstd/Makefile b/lib/zstd/Makefile
+index dd0a359c135b4..7920cbbfeae9f 100644
+--- a/lib/zstd/Makefile
++++ b/lib/zstd/Makefile
+@@ -3,16 +3,7 @@ obj-$(CONFIG_ZSTD_DECOMPRESS) += zstd_decompress.o
+ 
+ ccflags-y += -O3
+ 
+-# Object files unique to zstd_compress and zstd_decompress
+-zstd_compress-y := fse_compress.o huf_compress.o compress.o
+-zstd_decompress-y := huf_decompress.o decompress.o
+-
+-# These object files are shared between the modules.
+-# Always add them to zstd_compress.
+-# Unless both zstd_compress and zstd_decompress are built in
+-# then also add them to zstd_decompress.
+-zstd_compress-y += entropy_common.o fse_decompress.o zstd_common.o
+-
+-ifneq ($(CONFIG_ZSTD_COMPRESS)$(CONFIG_ZSTD_DECOMPRESS),yy)
+-	zstd_decompress-y += entropy_common.o fse_decompress.o zstd_common.o
+-endif
++zstd_compress-y := fse_compress.o huf_compress.o compress.o \
++		   entropy_common.o fse_decompress.o zstd_common.o
++zstd_decompress-y := huf_decompress.o decompress.o \
++		     entropy_common.o fse_decompress.o zstd_common.o

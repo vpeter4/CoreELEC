@@ -1,0 +1,28 @@
+print scancode in hex format too
+
+--- a/drivers/amlogic/input/remote/remote_meson.c	2019-07-27 14:53:58.046714800 +0200
++++ b/drivers/amlogic/input/remote/remote_meson.c	2019-07-27 15:06:19.725373296 +0200
+@@ -271,7 +271,7 @@ PRINT_LINE
+ 
+ 	index = ir_lookup_by_scancode(&ct->tab, scancode);
+ 	if (index < 0) {
+-		dev_err(chip->dev, "scancode %d undefined\n", scancode);
++		dev_err(chip->dev, "scancode %d [ 0x%x ] undefined\n", scancode, scancode);
+ 		return KEY_RESERVED;
+ 	}
+ 
+
+print selected protocol name (NEC, RC6, ...)
+
+--- a/drivers/amlogic/input/remote/remote_regmap.c	2019-07-28 09:09:03.479002436 +0200
++++ b/drivers/amlogic/input/remote/remote_regmap.c	2019-07-28 08:35:57.278589700 +0200
+@@ -600,6 +600,9 @@ static int ir_contr_init(struct remote_c
+ 	 * [0] = 0x01,set to 1 to reset the IR decoder
+ 	 */
+ 	remote_reg_write(chip, id, REG_REG1, 0x01);
++
++	dev_info(chip->dev, "protocol name = %s\n", (*reg_proto)->name);
++
+ 	dev_info(chip->dev, "default protocol = 0x%x and id = %d\n",
+ 				(*reg_proto)->protocol, id);
+ 	reg_map = (*reg_proto)->reg_map;

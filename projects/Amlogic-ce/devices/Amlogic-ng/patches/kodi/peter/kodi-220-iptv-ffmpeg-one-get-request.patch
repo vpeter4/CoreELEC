@@ -1,0 +1,43 @@
+send only one GET request for m3u8 playlist on channel switch
+don't really understand why this helps but it does :)
+
+copied from kodi-ce-100.03-reverts.patch
+  https://github.com/CoreELEC/CoreELEC/commit/2ee96490c1#diff-ce6daa3596d2c7735bce0a2fb85aa921
+
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp	2020-06-20 19:57:59.549392571 +0200
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp	2020-06-20 19:58:06.295678873 +0200
+@@ -264,30 +264,11 @@ bool CDVDDemuxFFmpeg::Open(std::shared_p
+         strFile = url.Get();
+       }
+     }
+-    if (result < 0)
++    if (result < 0 && avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0 )
+     {
+-      m_pFormatContext->flags |= AVFMT_FLAG_PRIV_OPT;
+-      if (avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0)
+-      {
+-        CLog::Log(LOGDEBUG, "Error, could not open file %s", CURL::GetRedacted(strFile).c_str());
+-        Dispose();
+-        av_dict_free(&options);
+-        return false;
+-      }
+-      av_dict_free(&options);
+-      avformat_close_input(&m_pFormatContext);
+-      m_pFormatContext = avformat_alloc_context();
+-      m_pFormatContext->interrupt_callback = int_cb;
+-      m_pFormatContext->flags &= ~AVFMT_FLAG_PRIV_OPT;
+-      AVDictionary* options = GetFFMpegOptionsFromInput();
+-      av_dict_set_int(&options, "load_all_variants", 0, AV_OPT_SEARCH_CHILDREN);
+-      if (avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0)
+-      {
+-        CLog::Log(LOGDEBUG, "Error, could not open file (2) %s", CURL::GetRedacted(strFile).c_str());
+-        Dispose();
+-        av_dict_free(&options);
+-        return false;
+-      }
++      CLog::Log(LOGDEBUG, "Error, could not open file %s", CURL::GetRedacted(strFile).c_str());
++      Dispose();
++      return false;
+     }
+     av_dict_free(&options);
+   }
