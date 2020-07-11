@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 # Copyright (C) 2009-2016 Stephan Raue (stephan@openelec.tv)
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
 
 unset _CACHE_PACKAGE_LOCAL _CACHE_PACKAGE_GLOBAL _DEBUG_DEPENDS_LIST _DEBUG_PACKAGE_LIST
 
@@ -11,7 +12,7 @@ unset _CACHE_PACKAGE_LOCAL _CACHE_PACKAGE_GLOBAL _DEBUG_DEPENDS_LIST _DEBUG_PACK
 . config/show_config
 
 # Validate UBOOT_SYSTEM if it is specified
-if [ "${BOOTLOADER}" = "u-boot" -a -n "${DEVICE}" ]; then
+if [ "${BOOTLOADER}" = "u-boot" -a -n "${DEVICE}" -a ${PROJECT} != "Amlogic-ce" ]; then
   if [ -z "${UBOOT_SYSTEM}" ]; then
     ${SCRIPTS}/uboot_helper ${PROJECT} ${DEVICE} >/dev/null
   else
@@ -50,10 +51,12 @@ function do_mkimage() {
     DISTRO_BOOTLABEL="${DISTRO_BOOTLABEL}" \
     DISTRO_DISKLABEL="${DISTRO_DISKLABEL}" \
     UBOOT_SYSTEM="${UBOOT_SYSTEM}" \
+    UBOOT_VERSION="${UBOOT_VERSION}" \
     EXTRA_CMDLINE="${EXTRA_CMDLINE}" \
     SYSTEM_SIZE="${SYSTEM_SIZE}" \
     SYSTEM_PART_START="${SYSTEM_PART_START}" \
     OVA_SIZE="${OVA_SIZE}" \
+    SUBDEVICE="${SUBDEVICE}" \
     ${SCRIPTS}/mkimage
 }
 
@@ -155,19 +158,33 @@ echo "${TARGET_VERSION}" > ${INSTALL}/etc/release
 cat <<EOF >${INSTALL}/etc/os-release
 NAME="${DISTRONAME}"
 VERSION="${LIBREELEC_VERSION}"
-ID="libreelec"
+ID="coreelec"
 VERSION_ID="${OS_VERSION}"
 PRETTY_NAME="${DISTRONAME} (${LIBREELEC_BUILD}): ${LIBREELEC_VERSION}"
-HOME_URL="https://libreelec.tv"
+HOME_URL="https://coreelec.org"
 BUG_REPORT_URL="${ORIGIN_URL}"
 BUILD_ID="${GIT_HASH}"
+OPENELEC_ARCH="${LIBREELEC_ARCH}"
 LIBREELEC_ARCH="${LIBREELEC_ARCH}"
-LIBREELEC_BUILD="${LIBREELEC_BUILD}"
-LIBREELEC_PROJECT="${PROJECT}"
+COREELEC_ARCH="${LIBREELEC_ARCH}"
+COREELEC_BUILD="${LIBREELEC_BUILD}"
+COREELEC_PROJECT="${PROJECT}"
 EOF
-[ -n "${DEVICE}" ] && echo "LIBREELEC_DEVICE=\"${DEVICE}\"" >> ${INSTALL}/etc/os-release
+
+# rename CE project to old scheme
+[ "${PROJECT}" = "Amlogic-ce" ] && sed -i "s,$PROJECT,$DEVICE,g" ${INSTALL}/etc/os-release
+
+[ -n "${DEVICE}" ] && echo "COREELEC_DEVICE=\"${DEVICE}\"" >> ${INSTALL}/etc/os-release
 [ -n "${BUILDER_NAME}" ] && echo "BUILDER_NAME=\"${BUILDER_NAME}\"" >> ${INSTALL}/etc/os-release
 [ -n "${BUILDER_VERSION}" ] && echo "BUILDER_VERSION=\"${BUILDER_VERSION}\"" >> ${INSTALL}/etc/os-release
+
+# Add release notes / changelog
+
+if [ -n "${RELEASE_NOTES}" ] && [ -f "${RELEASE_NOTES}" ]; then
+  cp "${RELEASE_NOTES}" ${INSTALL}/etc/release-notes
+else
+  echo "" > ${INSTALL}/etc/release-notes
+fi
 
 # Create /etc/issue
 cat <<EOF >${INSTALL}/etc/issue
@@ -318,7 +335,6 @@ if [ "${1}" = "release" -o "${1}" = "mkimage" -o "${1}" = "noobs" ]; then
     UUID_SYSTEM="$(date '+%d%m')-$(date '+%M%S')"
     UUID_STORAGE="$(uuidgen)"
 
-    DEVICE_BOARDS=
     if [ "${BOOTLOADER}" = "u-boot" -a -z "${UBOOT_SYSTEM}" -a -n "${DEVICE}" ]; then
       DEVICE_BOARDS=$(${SCRIPTS}/uboot_helper "${PROJECT}" "${DEVICE}")
     fi
@@ -340,7 +356,15 @@ if [ "${1}" = "release" -o "${1}" = "mkimage" -o "${1}" = "noobs" ]; then
         do_mkimage "${IMAGE_NAME}-${UBOOT_SYSTEM}"
       done
     else
-      do_mkimage
+      if [ -n "${SUBDEVICES}" ]; then
+        [ "${PROJECT}" = "Amlogic-legacy" -o "${PROJECT}" = "Amlogic-ng" ] && SUBDEVICES+=" Generic"
+        [ "${PROJECT}" = "Amlogic-ce" ] && SUBDEVICES+=" Generic"
+        for SUBDEVICE in ${SUBDEVICES}; do
+          do_mkimage "${IMAGE_NAME}"
+        done
+      else
+        do_mkimage
+      fi
     fi
   fi
 
@@ -467,4 +491,14 @@ if [ "${1}" = "release" -o "${1}" = "mkimage" -o "${1}" = "noobs" ]; then
     # Cleanup release dir
     rm -rf ${RELEASE_DIR}
   fi
+fi
+
+# remove unneeded files in target folder
+if [ "$COREELEC_TARGET_REMOVE" = "kernel_system" ]; then
+  rm -f ${TARGET_IMG}/*.kernel
+  rm -f ${TARGET_IMG}/*.system
+elif [ "$COREELEC_TARGET_REMOVE" = "kernel_system_sha256" ]; then
+  rm -f ${TARGET_IMG}/*.kernel
+  rm -f ${TARGET_IMG}/*.system
+  rm -f ${TARGET_IMG}/*.sha256
 fi

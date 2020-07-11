@@ -385,6 +385,10 @@ if len(sys.argv) == 2 and sys.argv[1] in ['help', 'usage']:
   usage()
   sys.exit(0)
 
+# no need for Coreelec Amlogic
+if len(sys.argv) > 1 and sys.argv[1] == 'Amlogic-ce':
+  sys.exit(0)
+  
 if len(sys.argv) > 1 and sys.argv[1] not in devices:
   exit_error('Invalid project: %s' % sys.argv[1])
 

@@ -7,6 +7,8 @@ system:
 
 release:
 	./scripts/image release
+	@echo Copying tar to web server in public/amlogic 
+	@cp target/CoreELEC-Amlogic-ng.arm-*.tar ~/public/amlogic/
 
 image:
 	./scripts/image mkimage

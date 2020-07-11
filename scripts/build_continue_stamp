@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
+
+. config/options "${1}"
+
+if [ -z "$1" ]; then
+  echo "usage: $0 package_name[:<host|target|init|bootstrap>]"
+  exit 1
+fi
+
+if [ "${1%:*}" = "${1##*:}" ]; then
+  rm -f "${STAMPS}/${1%:*}/build_target"
+else
+  rm -f "${STAMPS}/${1%:*}/build_${1##*:}"
+fi
+
+# if not removed it will grow
+image_lzo="${BUILD}/${1%:*}*/arch/arm64/boot/Image.lzo"
+if [ "${1%:*}" = "linux" -a -f ${image_lzo} ]; then
+  rm -f ${image_lzo}
+fi
+
+./scripts/build $1
+
+if [ "${1%:*}" = "linux" -a -f ${image_lzo} ]; then
+  ls -l ${image_lzo}
+  echo
+  echo "Copying kernel to web server in public/amlogic"
+  cp ${image_lzo} ~/public/amlogic
+  echo
+fi
