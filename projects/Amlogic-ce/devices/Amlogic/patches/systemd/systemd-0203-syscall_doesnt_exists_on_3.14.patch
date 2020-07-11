@@ -1,0 +1,91 @@
+--- a/src/basic/missing_syscall.h	2020-06-25 15:51:54.461431129 +0200
++++ b/src/basic/missing_syscall.h	2020-06-25 15:53:16.468114494 +0200
+@@ -445,45 +445,17 @@ static inline int missing_bpf(int cmd, u
+ 
+ /* ======================================================================= */
+ 
+-#if !HAVE_STATX
+-/* may be (invalid) negative number due to libseccomp, see PR 13319 */
+-#  if ! (defined __NR_statx && __NR_statx >= 0)
+-#    if defined __NR_statx
+-#      undef __NR_statx
+-#    endif
+-#    if defined __aarch64__ || defined __arm__
+-#      define __NR_statx 397
+-#    elif defined __alpha__
+-#      define __NR_statx 522
+-#    elif defined __i386__ || defined __powerpc64__
+-#      define __NR_statx 383
+-#    elif defined __sparc__
+-#      define __NR_statx 360
+-#    elif defined __x86_64__
+-#      define __NR_statx 332
+-#    else
+-#      warning "__NR_statx not defined for your architecture"
+-#    endif
+-#  endif
+-
+ struct statx;
+-#endif
+ 
+ /* This typedef is supposed to be always defined. */
+ typedef struct statx struct_statx;
+ 
+-#if !HAVE_STATX
+ static inline ssize_t missing_statx(int dfd, const char *filename, unsigned flags, unsigned int mask, struct statx *buffer) {
+-#  ifdef __NR_statx
+-        return syscall(__NR_statx, dfd, filename, flags, mask, buffer);
+-#  else
+         errno = ENOSYS;
+         return -1;
+-#  endif
+ }
+ 
+ #  define statx missing_statx
+-#endif
+ 
+ #if !HAVE_SET_MEMPOLICY
+ 
+
+@@ -527,41 +494,15 @@ static inline long missing_get_mempolicy
+ #define get_mempolicy missing_get_mempolicy
+ #endif
+ 
+-#if !HAVE_PIDFD_OPEN
+-/* may be (invalid) negative number due to libseccomp, see PR 13319 */
+-#  if ! (defined __NR_pidfd_open && __NR_pidfd_open >= 0)
+-#    if defined __NR_pidfd_open
+-#      undef __NR_pidfd_open
+-#    endif
+-#    define __NR_pidfd_open 434
+-#endif
+ static inline int pidfd_open(pid_t pid, unsigned flags) {
+-#ifdef __NR_pidfd_open
+-        return syscall(__NR_pidfd_open, pid, flags);
+-#else
+         errno = ENOSYS;
+         return -1;
+-#endif
+ }
+-#endif
+ 
+-#if !HAVE_PIDFD_SEND_SIGNAL
+-/* may be (invalid) negative number due to libseccomp, see PR 13319 */
+-#  if ! (defined __NR_pidfd_send_signal && __NR_pidfd_send_signal >= 0)
+-#    if defined __NR_pidfd_send_signal
+-#      undef __NR_pidfd_send_signal
+-#    endif
+-#    define __NR_pidfd_send_signal 424
+-#endif
+ static inline int pidfd_send_signal(int fd, int sig, siginfo_t *info, unsigned flags) {
+-#ifdef __NR_pidfd_open
+-        return syscall(__NR_pidfd_send_signal, fd, sig, info, flags);
+-#else
+         errno = ENOSYS;
+         return -1;
+-#endif
+ }
+-#endif
+ 
+ #if !HAVE_RT_SIGQUEUEINFO
+ static inline int rt_sigqueueinfo(pid_t tgid, int sig, siginfo_t *info) {
