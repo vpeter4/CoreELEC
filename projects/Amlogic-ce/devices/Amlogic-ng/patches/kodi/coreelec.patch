@@ -27,7 +27,7 @@ index c244baed71..459c305fe7 100644
  	<extension point="xbmc.addon.metadata">
  		<summary lang="af_ZA">Installeer Byvoegsels vanaf Kodi.tv</summary>
 diff --git a/addons/resource.language.en_gb/resources/strings.po b/addons/resource.language.en_gb/resources/strings.po
-index 64432e7700..af1519a160 100644
+index 64432e7700..43e82abe6d 100644
 --- a/addons/resource.language.en_gb/resources/strings.po
 +++ b/addons/resource.language.en_gb/resources/strings.po
 @@ -615,7 +615,7 @@ msgstr ""
@@ -155,7 +155,31 @@ index 64432e7700..af1519a160 100644
  
  #. pvr "channels" settings group label
  #: system/settings/settings.xml
-@@ -20024,7 +20104,13 @@ msgctxt "#36421"
+@@ -18157,12 +18237,22 @@ msgctxt "#36049"
+ msgid "Remote button press release time (ms)"
+ msgstr ""
+ 
++#: system/peripherals.xml
++msgctxt "#36051"
++msgid "Seconds standby is delayed after Screensaver is activated"
++msgstr ""
++
++#: system/peripherals.xml
++msgctxt "#36052"
++msgid "Put devices in standby by Screensaver on paused video"
++msgstr ""
++
+ #: system/settings.xml
+ msgctxt "#36050"
+ msgid "On start"
+ msgstr ""
+ 
+-#empty strings from id 36051 to 36098
++#empty strings from id 36053 to 36098
+ 
+ #: system/settings/settings.xml
+ msgctxt "#36099"
+@@ -20024,7 +20114,13 @@ msgctxt "#36421"
  msgid "Bypassing VDPAU mixer saves resources on low power systems but slightly reduces picture quality."
  msgstr ""
  
@@ -170,7 +194,7 @@ index 64432e7700..af1519a160 100644
  
  #: system/settings/settings.xml
  msgctxt "#36424"
-@@ -20109,6 +20195,18 @@ msgstr ""
+@@ -20109,6 +20205,18 @@ msgstr ""
  
  #empty strings from id 36443 to 36459
  
@@ -189,7 +213,7 @@ index 64432e7700..af1519a160 100644
  #. Description of settings with label #14112 "Enable event logging"
  #: system/settings/settings.xml
  msgctxt "#36460"
-@@ -21503,6 +21601,21 @@ msgstr ""
+@@ -21503,6 +21611,21 @@ msgstr ""
  #empty strings from id 38082 to 38099
  #strings 38082 to 38099 reserved for music library
  
@@ -211,7 +235,7 @@ index 64432e7700..af1519a160 100644
  #. Description of section #14200 "Player""
  #: system/settings/settings.xml
  msgctxt "#38100"
-@@ -21839,7 +21952,27 @@ msgctxt "#38354"
+@@ -21839,7 +21962,27 @@ msgctxt "#38354"
  msgid "Unable to read xml file"
  msgstr ""
  
@@ -637,6 +661,19 @@ index 1b02def93b..aceb9e698e 100644
  	</include>
  	<include name="OpenClose_FadeSlide_Right">
  		<animation type="WindowOpen">
+diff --git a/addons/skin.estuary/xml/Includes_Home.xml b/addons/skin.estuary/xml/Includes_Home.xml
+index 8abe7844a2..e64ce81767 100644
+--- a/addons/skin.estuary/xml/Includes_Home.xml
++++ b/addons/skin.estuary/xml/Includes_Home.xml
+@@ -859,7 +859,7 @@
+ 			<property name="FanartCode">$INFO[Window(weather).Property(Day$PARAM[item_index].FanartCode)]</property>
+ 			<thumb>$INFO[Window(weather).Property(Day$PARAM[item_index].OutlookIcon)]</thumb>
+ 			<onclick>noop</onclick>
+-			<visible>String.IsEmpty(Window(weather).Property(Daily.IsFetched)) + !String.IsEmpty(Window(weather).Property(Day$PARAM[item_index].Outlook))</visible>
++			<visible>String.IsEmpty(Window(weather).Property(Daily.IsFetched))!String.IsEmpty(Window(weather).Property(Day$PARAM[item_index].Outlook))</visible>
+ 		</item>
+ 	</include>
+ 	<include name="WeatherMapItem">
 diff --git a/addons/skin.estuary/xml/Settings.xml b/addons/skin.estuary/xml/Settings.xml
 index 18ad10234b..9227cbe2ce 100644
 --- a/addons/skin.estuary/xml/Settings.xml
@@ -1181,20 +1218,33 @@ index 5cb986f1b6..616aef7411 100644
        <pagedown>ChannelDown</pagedown>
        <period mod="longpress">ChannelNumberSeparator</period>
 diff --git a/system/peripherals.xml b/system/peripherals.xml
-index ff303e99ae..7ead2a6071 100644
+index ff303e99ae..3a1d35bfc6 100644
 --- a/system/peripherals.xml
 +++ b/system/peripherals.xml
-@@ -18,7 +18,7 @@
-     <setting key="cec_wake_screensaver" type="bool" value="1" label="36010" order="7" />
-     <setting key="standby_pc_on_tv_standby" type="enum" value="13011" label="36029" order="8" lvalues="36028|13005|13011|13010|13009|36044|36045" />
-     <setting key="standby_tv_on_pc_standby" type="bool" value="1" label="36026" order="9" />
+@@ -15,25 +15,27 @@
+     <setting key="standby_devices" type="enum" value="36037" label="36008" lvalues="36037|36038|36039|231" order="4" />
+     <setting key="send_inactive_source" type="bool" value="1" label="36025" order="5" />
+     <setting key="cec_standby_screensaver" type="bool" value="0" label="36009" order="6" />
+-    <setting key="cec_wake_screensaver" type="bool" value="1" label="36010" order="7" />
+-    <setting key="standby_pc_on_tv_standby" type="enum" value="13011" label="36029" order="8" lvalues="36028|13005|13011|13010|13009|36044|36045" />
+-    <setting key="standby_tv_on_pc_standby" type="bool" value="1" label="36026" order="9" />
 -    <setting key="use_tv_menu_language" type="bool" value="1" label="36018" order="10" />
-+    <setting key="use_tv_menu_language" type="bool" value="0" label="36018" order="10" />
++    <setting key="cec_standby_screensaver_paused" type="bool" value="0" order="7" label="36052" />
++    <setting key="cec_wake_screensaver" type="bool" value="1" label="36010" order="8" />
++    <setting key="standby_pc_on_tv_standby" type="enum" value="13011" label="36029" order="9" lvalues="36028|13005|13011|13010|13009|36044|36045" />
++    <setting key="standby_tv_on_pc_standby" type="bool" value="1" label="36026" order="10" />
++    <setting key="use_tv_menu_language" type="bool" value="0" label="36018" order="11" />
      <setting key="pause_playback_on_deactivate" type="bool" value="1" label="36033" configurable="0" />
-     <setting key="pause_or_stop_playback_on_deactivate" type="enum" value="231" label="36033" order="11" lvalues="231|36044|36045" />
-     <setting key="connected_device" type="enum" label="36019" value="36037" lvalues="36037|36038" order="12" />
-@@ -27,7 +27,7 @@
-     <setting key="power_avr_on_as" type="bool" label="36046" value="0" order="15" />
+-    <setting key="pause_or_stop_playback_on_deactivate" type="enum" value="231" label="36033" order="11" lvalues="231|36044|36045" />
+-    <setting key="connected_device" type="enum" label="36019" value="36037" lvalues="36037|36038" order="12" />
+-    <setting key="cec_hdmi_port" type="int" value="1" min="1" max="15" label="36015" order="13" />
+-    <setting key="physical_address" type="string" label="36021" value="0" order="14" />
+-    <setting key="power_avr_on_as" type="bool" label="36046" value="0" order="15" />
++    <setting key="pause_or_stop_playback_on_deactivate" type="enum" value="231" label="36033" order="12" lvalues="231|36044|36045" />
++    <setting key="connected_device" type="enum" label="36019" value="36037" lvalues="36037|36038" order="13" />
++    <setting key="cec_hdmi_port" type="int" value="1" min="1" max="15" label="36015" order="14" />
++    <setting key="physical_address" type="string" label="36021" value="0" order="15" />
++    <setting key="power_avr_on_as" type="bool" label="36046" value="0" order="16" />
  
      <setting key="tv_vendor" type="int" value="0" configurable="0" />
 -    <setting key="device_name" type="string" value="Kodi" configurable="0" />
@@ -1202,6 +1252,16 @@ index ff303e99ae..7ead2a6071 100644
      <setting key="device_type" type="int" value="1" configurable="0" />
      <setting key="wake_devices_advanced" type="string" value="" configurable="0" />
      <setting key="standby_devices_advanced" type="string" value="" configurable="0" />
+-    <setting key="double_tap_timeout_ms" type="int" min="50" max="1000" step="50" value="300" label="36047" order="16" />
+-    <setting key="button_repeat_rate_ms" type="int" min="0" max="250" step="10" value="0" label="36048" order="17" />
+-    <setting key="button_release_delay_ms" type="int" min="0" max="500" step="50" value="0" label="36049" order="18" />
++    <setting key="double_tap_timeout_ms" type="int" min="50" max="1000" step="50" value="300" label="36047" order="17" />
++    <setting key="button_repeat_rate_ms" type="int" min="0" max="250" step="10" value="0" label="36048" order="18" />
++    <setting key="button_release_delay_ms" type="int" min="0" max="500" step="50" value="0" label="36049" order="19" />
++    <setting key="screensaver_delay_standby" type="int" min="0" max="7200" step="10" value="0" label="36051" order="20" />
+   </peripheral>
+ 
+   <peripheral vendor_product="2548:1001,2548:1002" bus="usb" name="Pulse-Eight CEC Adapter" mapTo="cec">
 diff --git a/system/settings/aml-linux.xml b/system/settings/aml-linux.xml
 new file mode 100644
 index 0000000000..d9efce732b
@@ -1229,7 +1289,7 @@ index 0000000000..d9efce732b
 +  </section>
 +</settings>
 diff --git a/system/settings/settings.xml b/system/settings/settings.xml
-index def3740936..29bb144b82 100755
+index def3740936..a4839d51d1 100755
 --- a/system/settings/settings.xml
 +++ b/system/settings/settings.xml
 @@ -113,6 +113,81 @@
@@ -1392,7 +1452,7 @@ index def3740936..29bb144b82 100755
 +          <control type="toggle" />
 +        </setting>
 +        <setting id="coreelec.amlogic.disableguiscaling" type="boolean" label="14290" help="14291">
-+          <requirement>HAVE_AMCODEC</requirement>
++          <requirement>HAVE_4K_GUI</requirement>
 +          <default>false</default>
 +          <control type="toggle" />
 +        </setting>
@@ -1722,7 +1782,7 @@ index 80f3277610..3627d50d08 100644
  VERSION_MINOR 0
  VERSION_TAG ALPHA1
 diff --git a/xbmc/Application.cpp b/xbmc/Application.cpp
-index 4f6b91f29d..654c0fc96d 100644
+index ed44da24ed..50c4641606 100644
 --- a/xbmc/Application.cpp
 +++ b/xbmc/Application.cpp
 @@ -185,6 +185,10 @@
@@ -1821,7 +1881,7 @@ index 4f6b91f29d..654c0fc96d 100644
      CLog::Log(LOGINFO, "Stopping all");
  
      // cancel any jobs from the jobmanager
-@@ -4213,7 +4241,7 @@ void CApplication::ProcessSlow()
+@@ -4218,7 +4246,7 @@ void CApplication::ProcessSlow()
    if (CPlatformPosix::TestQuitFlag())
    {
      CLog::Log(LOGINFO, "Quitting due to POSIX signal");
@@ -1830,7 +1890,7 @@ index 4f6b91f29d..654c0fc96d 100644
    }
  #endif
  
-@@ -4683,7 +4711,6 @@ bool CApplication::SwitchToFullScreen(bool force /* = false */)
+@@ -4688,7 +4716,6 @@ bool CApplication::SwitchToFullScreen(bool force /* = false */)
  
  void CApplication::Minimize()
  {
@@ -1850,24 +1910,6 @@ index 5f94dd3e07..3d11c4fa37 100644
    void Stop(int exitCode);
    void UnloadSkin(bool forReload = false);
    bool LoadCustomWindows();
-diff --git a/xbmc/FileItem.cpp b/xbmc/FileItem.cpp
-index ab14fa3355..d0a86211a8 100644
---- a/xbmc/FileItem.cpp
-+++ b/xbmc/FileItem.cpp
-@@ -668,13 +668,6 @@ void CFileItem::Serialize(CVariant& value) const
- 
-   if (m_gameInfoTag)
-     (*m_gameInfoTag).Serialize(value["gameInfoTag"]);
--
--  if (!m_mapProperties.empty())
--  {
--    auto& customProperties = value["customproperties"];
--    for (const auto& prop : m_mapProperties)
--      customProperties[prop.first] = prop.second;
--  }
- }
- 
- void CFileItem::ToSortable(SortItem &sortable, Field field) const
 diff --git a/xbmc/GUIInfoManager.cpp b/xbmc/GUIInfoManager.cpp
 index 1d112c4dd2..ef1974f0c8 100644
 --- a/xbmc/GUIInfoManager.cpp
@@ -2335,7 +2377,7 @@ index 9bf0733cdf..d9a28a4a71 100644
    {
      // we don't trust ELD information and push back our supported formats explicitly
 diff --git a/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.cpp b/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.cpp
-index 9034e27a6a..964e69543b 100644
+index 10efd5a43a..bb71f61401 100644
 --- a/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.cpp
 +++ b/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.cpp
 @@ -23,6 +23,8 @@
@@ -2372,7 +2414,7 @@ index 9034e27a6a..964e69543b 100644
  static int AEStreamFormatToATFormat(const CAEStreamInfo::DataType& dt)
  {
    switch (dt)
-@@ -405,6 +425,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
+@@ -411,6 +431,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
        atChannelMask = CJNIAudioFormat::CHANNEL_OUT_STEREO;
    }
  
@@ -2383,7 +2425,7 @@ index 9034e27a6a..964e69543b 100644
    while (!m_at_jni)
    {
      CLog::Log(LOGINFO, "Trying to open: samplerate: %u, channelMask: %d, encoding: %d",
-@@ -482,8 +506,28 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
+@@ -488,8 +512,28 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
      }
      else
      {
@@ -2413,7 +2455,7 @@ index 9034e27a6a..964e69543b 100644
        // aim at 200 ms buffer and 50 ms periods
        m_audiotrackbuffer_sec =
            static_cast<double>(m_min_buffer_size) / (m_sink_frameSize * m_sink_sampleRate);
-@@ -598,7 +642,16 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
+@@ -604,7 +648,16 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
    // and add head_pos which wrapped around, e.g. 0x0001 0000 0000 -> 0x0001 0000 0004
    m_headPos = (m_headPos & UINT64_UPPER_BYTES) | (uint64_t)head_pos;
  
@@ -2431,7 +2473,7 @@ index 9034e27a6a..964e69543b 100644
  
    // if sink is run dry without buffer time written anymore
    if (gone > m_duration_written)
-@@ -990,6 +1043,25 @@ void CAESinkAUDIOTRACK::UpdateAvailablePassthroughCapabilities(bool isRaw)
+@@ -996,6 +1049,25 @@ void CAESinkAUDIOTRACK::UpdateAvailablePassthroughCapabilities(bool isRaw)
        }
      }
  
@@ -2457,8 +2499,8 @@ index 9034e27a6a..964e69543b 100644
      if (CJNIAudioManager::GetSDKVersion() >= 23)
      {
        if (CJNIAudioFormat::ENCODING_DTS_HD != -1)
-@@ -1078,15 +1150,21 @@ void CAESinkAUDIOTRACK::UpdateAvailablePCMCapabilities()
-     CLog::Log(LOGINFO, "Float is supported");
+@@ -1092,15 +1164,21 @@ void CAESinkAUDIOTRACK::UpdateAvailablePCMCapabilities()
+     CLog::Log(LOGNOTICE, "Multi channel Float is supported");
    }
  
 -  int test_sample[] = { 32000, 44100, 48000, 88200, 96000, 176400, 192000 };
@@ -2487,7 +2529,7 @@ index 9034e27a6a..964e69543b 100644
    }
    std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(m_info.m_sampleRates));
 diff --git a/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.h b/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.h
-index 88ae3be1b4..adb5c62cdb 100644
+index 6409c42c23..24d9eb0dc6 100644
 --- a/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.h
 +++ b/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.h
 @@ -49,6 +49,7 @@ protected:
@@ -7264,6 +7306,19 @@ index a5292d87d4..55cf684188 100644
                         CORE_PLATFORM_NAME_LC STREQUAL gbm OR
                         CORE_PLATFORM_NAME_LC STREQUAL x11 OR
                         CORE_PLATFORM_NAME_LC STREQUAL wayland))
+diff --git a/xbmc/dbwrappers/qry_dat.cpp b/xbmc/dbwrappers/qry_dat.cpp
+index 032002a9cb..bc68d2d79e 100644
+--- a/xbmc/dbwrappers/qry_dat.cpp
++++ b/xbmc/dbwrappers/qry_dat.cpp
+@@ -533,7 +533,7 @@ double field_value::get_asDouble() const {
+ int64_t field_value::get_asInt64() const {
+     switch (field_type) {
+     case ft_String: {
+-      return std::atoll(str_value.c_str());
++      return std::stoll(str_value);
+     }
+     case ft_Boolean:{
+       return (int64_t)bool_value;
 diff --git a/xbmc/guilib/GUIWindowManager.cpp b/xbmc/guilib/GUIWindowManager.cpp
 index 350fbdd089..4aef80baa3 100644
 --- a/xbmc/guilib/GUIWindowManager.cpp
@@ -7387,56 +7442,6 @@ index 252cd1d9b0..22e01dc8a9 100644
    //Todo wait until running
  
    return true;
-diff --git a/xbmc/interfaces/json-rpc/schema/types.json b/xbmc/interfaces/json-rpc/schema/types.json
-index 21a2347ed1..bf755dc5bf 100644
---- a/xbmc/interfaces/json-rpc/schema/types.json
-+++ b/xbmc/interfaces/json-rpc/schema/types.json
-@@ -397,10 +397,6 @@
-       "label": { "type": "string", "required": true }
-     }
-   },
--  "Item.CustomProperties": {
--    "type": "object",
--    "additionalProperties": { "$ref": "Global.String.NotEmpty" }
--  },
-   "Media.Details.Base": {
-     "extends": "Item.Details.Base",
-     "properties": {
-@@ -1531,8 +1527,7 @@
-       "bitrate": { "type": "integer" },
-       "samplerate": { "type": "integer" },
-       "channels": { "type": "integer"},
--      "albumstatus": { "type": "string" },
--      "customproperties": { "$ref": "Item.CustomProperties" }
-+      "albumstatus": { "type": "string" }
-     }
-   },
-   "List.Fields.All": {
-@@ -1555,7 +1550,7 @@
-                 "contributors", "displaycomposer", "displayconductor", "displayorchestra", "displaylyricist",
-                 "userrating", "votes", "sortartist", "musicbrainzreleasegroupid", "mediapath", "dynpath",
-                 "isboxset", "totaldiscs", "disctitle", "releasedate", "originaldate", "bpm",
--                "bitrate", "samplerate", "channels", "albumstatus", "datemodified", "datenew", "customproperties"]
-+                "bitrate", "samplerate", "channels", "albumstatus", "datemodified", "datenew"]
-     }
-   },
-   "List.Item.All": {
-@@ -1587,7 +1582,7 @@
-                 "episodeguide", "uniqueid", "dateadded", "size", "lastmodified", "mimetype",
-                 "specialsortseason", "specialsortepisode", "sortartist", "musicbrainzreleasegroupid",
-                 "isboxset", "totaldiscs", "disctitle", "releasedate", "originaldate", "bpm",
--                "bitrate", "samplerate", "channels", "datemodified", "datenew", "customproperties"]
-+                "bitrate", "samplerate", "channels", "datemodified", "datenew"]
-     }
-   },
-   "List.Item.File": {
-diff --git a/xbmc/interfaces/json-rpc/schema/version.txt b/xbmc/interfaces/json-rpc/schema/version.txt
-index 1b9bbc7425..6fb712b06f 100644
---- a/xbmc/interfaces/json-rpc/schema/version.txt
-+++ b/xbmc/interfaces/json-rpc/schema/version.txt
-@@ -1 +1 @@
--JSONRPC_VERSION 11.12.0
-+JSONRPC_VERSION 11.11.0
 diff --git a/xbmc/network/NetworkServices.cpp b/xbmc/network/NetworkServices.cpp
 index 801c0d65ac..92fc0497be 100644
 --- a/xbmc/network/NetworkServices.cpp
@@ -7497,10 +7502,61 @@ index 5d2bd43592..9012c1662e 100644
      return device;
  }
 diff --git a/xbmc/peripherals/devices/PeripheralCecAdapter.cpp b/xbmc/peripherals/devices/PeripheralCecAdapter.cpp
-index c65ce2d33f..60a860837a 100644
+index c65ce2d33f..635ec21d0d 100644
 --- a/xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 +++ b/xbmc/peripherals/devices/PeripheralCecAdapter.cpp
-@@ -168,7 +168,7 @@ void CPeripheralCecAdapter::Announce(ANNOUNCEMENT::AnnouncementFlag flag,
+@@ -110,11 +110,13 @@ void CPeripheralCecAdapter::ResetMembers(void)
+   m_bUseTVMenuLanguage = false;
+   m_bSendInactiveSource = false;
+   m_bPowerOffScreensaver = false;
++  m_bPowerOffScreensaverPaused = false;
+   m_bShutdownOnStandby = false;
+ 
+   m_currentButton.iButton = 0;
+   m_currentButton.iDuration = 0;
+   m_standbySent.SetValid(false);
++  m_ScreensaverStandbySent.SetValid(false);
+   m_configuration.Clear();
+ }
+ 
+@@ -135,6 +137,8 @@ void CPeripheralCecAdapter::Announce(ANNOUNCEMENT::AnnouncementFlag flag,
+            !strcmp(message, "OnScreensaverDeactivated") && m_bIsReady)
+   {
+     bool bIgnoreDeactivate(false);
++    m_ScreensaverStandbySent.SetValid(false);
++    m_bStandbyPending = false;
+     if (data["shuttingdown"].isBoolean())
+     {
+       // don't respond to the deactivation if we are just going to suspend/shutdown anyway
+@@ -153,12 +157,22 @@ void CPeripheralCecAdapter::Announce(ANNOUNCEMENT::AnnouncementFlag flag,
+   else if (flag == ANNOUNCEMENT::GUI && !strcmp(sender, "xbmc") &&
+            !strcmp(message, "OnScreensaverActivated") && m_bIsReady)
+   {
+-    // Don't put devices to standby if application is currently playing
+-    if (!g_application.GetAppPlayer().IsPlaying() && m_bPowerOffScreensaver)
++    if (m_bPowerOffScreensaver)
+     {
+-      // only power off when we're the active source
+-      if (m_cecAdapter->IsLibCECActiveSource())
+-        StandbyDevices();
++      // Don't put devices to standby if application is currently playing. Check if video is paused.
++      bool bNotPlaying = false;
++      if (m_bPowerOffScreensaverPaused)
++        bNotPlaying = (!g_application.GetAppPlayer().IsPlaying() || g_application.GetAppPlayer().IsPausedPlayback());
++      else
++        bNotPlaying = (!g_application.GetAppPlayer().IsPlaying());
++      if (bNotPlaying)
++      {
++        // only power off when we're the active source
++        if (m_cecAdapter->IsLibCECActiveSource()) {
++          m_ScreensaverStandbySent = CDateTime::GetCurrentDateTime();
++          StandbyDevices();
++        }
++      }
+     }
+   }
+   else if (flag == ANNOUNCEMENT::System && !strcmp(sender, "xbmc") && !strcmp(message, "OnSleep"))
+@@ -168,7 +182,7 @@ void CPeripheralCecAdapter::Announce(ANNOUNCEMENT::AnnouncementFlag flag,
        CSingleLock lock(m_critSection);
        m_bGoingToStandby = true;
      }
@@ -7509,7 +7565,7 @@ index c65ce2d33f..60a860837a 100644
    }
    else if (flag == ANNOUNCEMENT::System && !strcmp(sender, "xbmc") && !strcmp(message, "OnWake"))
    {
-@@ -297,13 +297,6 @@ bool CPeripheralCecAdapter::OpenConnection(void)
+@@ -297,13 +311,6 @@ bool CPeripheralCecAdapter::OpenConnection(void)
    CLog::Log(LOGDEBUG, "%s - opening a connection to the CEC adapter: %s", __FUNCTION__,
              m_strComPort.c_str());
  
@@ -7523,7 +7579,7 @@ index c65ce2d33f..60a860837a 100644
    bool bConnectionFailedDisplayed(false);
  
    while (!m_bStop && !bIsOpen)
-@@ -373,40 +366,7 @@ void CPeripheralCecAdapter::Process(void)
+@@ -373,40 +380,7 @@ void CPeripheralCecAdapter::Process(void)
  
    m_queryThread->StopThread(true);
  
@@ -7565,7 +7621,7 @@ index c65ce2d33f..60a860837a 100644
  
    m_cecAdapter->Close();
  
-@@ -728,7 +688,6 @@ void CPeripheralCecAdapter::CecAlert(void* cbParam,
+@@ -728,7 +702,6 @@ void CPeripheralCecAdapter::CecAlert(void* cbParam,
        break;
      case CEC_ALERT_CONNECTION_LOST:
        bReopenConnection = true;
@@ -7573,7 +7629,15 @@ index c65ce2d33f..60a860837a 100644
        break;
  #if defined(CEC_ALERT_PERMISSION_ERROR)
      case CEC_ALERT_PERMISSION_ERROR:
-@@ -1625,10 +1584,6 @@ bool CPeripheralCecAdapterUpdateThread::SetInitialConfiguration(void)
+@@ -1396,6 +1369,7 @@ void CPeripheralCecAdapter::SetConfigurationFromSettings(void)
+   m_bUseTVMenuLanguage = GetSettingBool("use_tv_menu_language");
+   m_configuration.bActivateSource = GetSettingBool("activate_source") ? 1 : 0;
+   m_bPowerOffScreensaver = GetSettingBool("cec_standby_screensaver");
++  m_bPowerOffScreensaverPaused = GetSettingBool("cec_standby_screensaver_paused") ? 1 : 0;
+   m_bPowerOnScreensaver = GetSettingBool("cec_wake_screensaver");
+   m_bSendInactiveSource = GetSettingBool("send_inactive_source");
+   m_configuration.bAutoWakeAVR = GetSettingBool("power_avr_on_as") ? 1 : 0;
+@@ -1625,10 +1599,6 @@ bool CPeripheralCecAdapterUpdateThread::SetInitialConfiguration(void)
  
    m_adapter->m_bIsReady = true;
  
@@ -7584,7 +7648,7 @@ index c65ce2d33f..60a860837a 100644
    CSingleLock lock(m_critSection);
    m_bIsUpdating = false;
    return true;
-@@ -1674,9 +1629,6 @@ void CPeripheralCecAdapterUpdateThread::Process(void)
+@@ -1674,9 +1644,6 @@ void CPeripheralCecAdapterUpdateThread::Process(void)
          UpdateAudioSystemStatus();
        }
  
@@ -7594,7 +7658,7 @@ index c65ce2d33f..60a860837a 100644
        {
          CSingleLock lock(m_critSection);
          if ((bUpdate = m_bNextConfigurationScheduled) == true)
-@@ -1764,6 +1716,44 @@ void CPeripheralCecAdapter::ProcessActivateSource(void)
+@@ -1764,6 +1731,44 @@ void CPeripheralCecAdapter::ProcessActivateSource(void)
      m_cecAdapter->SetActiveSource();
  }
  
@@ -7639,11 +7703,34 @@ index c65ce2d33f..60a860837a 100644
  void CPeripheralCecAdapter::StandbyDevices(void)
  {
    CSingleLock lock(m_critSection);
+@@ -1776,8 +1781,14 @@ void CPeripheralCecAdapter::ProcessStandbyDevices(void)
+ 
+   {
+     CSingleLock lock(m_critSection);
++    int iScreensaverDelay = GetSettingInt("screensaver_delay_standby");
++    if ((m_ScreensaverStandbySent.IsValid() &&
++        (CDateTime::GetCurrentDateTime() - m_ScreensaverStandbySent < CDateTimeSpan(0, 0, 0, iScreensaverDelay))) ||
++        (!m_cecAdapter->IsLibCECActiveSource()))
++      return;
+     bStandby = m_bStandbyPending;
+     m_bStandbyPending = false;
++    m_ScreensaverStandbySent.SetValid(false);
+     if (bStandby)
+       m_bGoingToStandby = true;
+   }
 diff --git a/xbmc/peripherals/devices/PeripheralCecAdapter.h b/xbmc/peripherals/devices/PeripheralCecAdapter.h
-index 94b7d543bd..6e48a79951 100644
+index 94b7d543bd..4096b7d667 100644
 --- a/xbmc/peripherals/devices/PeripheralCecAdapter.h
 +++ b/xbmc/peripherals/devices/PeripheralCecAdapter.h
-@@ -112,6 +112,7 @@ public:
+@@ -96,6 +96,7 @@ public:
+ 
+   // audio control
+   bool HasAudioControl(void);
++  CDateTime m_ScreensaverStandbySent;
+   void VolumeUp(void);
+   void VolumeDown(void);
+   void ToggleMute(void);
+@@ -112,6 +113,7 @@ public:
  
    // public CEC methods
    void ActivateSource(void);
@@ -7651,6 +7738,14 @@ index 94b7d543bd..6e48a79951 100644
    void StandbyDevices(void);
    bool ToggleDeviceState(CecStateChange mode = STATE_SWITCH_TOGGLE, bool forceType = false);
  
+@@ -188,6 +190,7 @@ private:
+   bool m_bPlaybackPaused;
+   std::string m_strComPort;
+   bool m_bPowerOnScreensaver;
++  bool m_bPowerOffScreensaverPaused;
+   bool m_bUseTVMenuLanguage;
+   bool m_bSendInactiveSource;
+   bool m_bPowerOffScreensaver;
 diff --git a/xbmc/platform/linux/CMakeLists.txt b/xbmc/platform/linux/CMakeLists.txt
 index 186c6dc7cc..61e874226f 100644
 --- a/xbmc/platform/linux/CMakeLists.txt
@@ -7992,8 +8087,53 @@ index b3905039c3..1a0d9b7724 100644
    if (CServiceBroker::GetSettingsComponent()->GetAdvancedSettings()->m_openGlDebugging)
    {
      if (IsExtSupported("GL_KHR_debug"))
+diff --git a/xbmc/settings/DisplaySettings.cpp b/xbmc/settings/DisplaySettings.cpp
+index da66d859f0..28107e4f70 100644
+--- a/xbmc/settings/DisplaySettings.cpp
++++ b/xbmc/settings/DisplaySettings.cpp
+@@ -14,6 +14,9 @@
+ #include <string>
+ #include <utility>
+ #include <vector>
++#include <fstream>
++#include <sys/statfs.h>
++#include <sys/mount.h>
+ 
+ #include "ServiceBroker.h"
+ #include "cores/VideoPlayer/VideoRenderers/ColorManager.h"
+@@ -431,8 +434,30 @@ void CDisplaySettings::SetCurrentResolution(RESOLUTION resolution, bool save /*
+   }
+   else if (resolution != m_currentResolution)
+   {
++    struct statfs fsInfo;
++    std::string aml_res_path = "/flash";
++    std::string aml_res_file = "resolution.ini";
++    auto result = statfs(aml_res_path.c_str(), &fsInfo);
++
+     m_currentResolution = resolution;
+     SetChanged();
++
++    if (!result && fsInfo.f_flags & MS_RDONLY)
++      result = mount(NULL, aml_res_path.c_str(), NULL, MS_NOATIME | MS_REMOUNT, NULL);
++
++    if (!result)
++    {
++      const RESOLUTION_INFO res = GetResolutionInfo(m_currentResolution);
++      std::ofstream ofs(aml_res_path + "/" + aml_res_file, std::ofstream::out);
++      ofs << "# WARNING DO NOT MODIFY THIS FILE! ALL CHANGES WILL BE LOST!\n";
++      ofs << "hdmimode=" << res.strId.c_str() << "\n";
++      ofs << "frac_rate_policy=" << std::to_string((res.fRefreshRate == floor(res.fRefreshRate)) ? 0 : 1).c_str() << "\n";
++      ofs.close();
++      CLog::Log(LOGDEBUG, "CDisplaySettings: Amlogic resolution got saved to %s/%s", aml_res_path.c_str(), aml_res_file.c_str());
++    }
++
++    if (!result && fsInfo.f_flags & MS_RDONLY)
++      mount(NULL, aml_res_path.c_str(), NULL, MS_RDONLY | MS_NOATIME | MS_REMOUNT, NULL);
+   }
+ }
+ 
 diff --git a/xbmc/settings/SettingConditions.cpp b/xbmc/settings/SettingConditions.cpp
-index ebf3318107..fe692456ed 100644
+index ebf3318107..b4687d0bb5 100644
 --- a/xbmc/settings/SettingConditions.cpp
 +++ b/xbmc/settings/SettingConditions.cpp
 @@ -25,6 +25,9 @@
@@ -8006,13 +8146,15 @@ index ebf3318107..fe692456ed 100644
  #include "utils/StringUtils.h"
  #include "windowing/WinSystem.h"
  
-@@ -309,6 +312,10 @@ void CSettingConditions::Initialize()
+@@ -309,6 +312,12 @@ void CSettingConditions::Initialize()
  #ifdef TARGET_DARWIN_TVOS
    m_simpleConditions.insert("have_tvos");
  #endif
 +#ifdef HAS_LIBAMCODEC
 +  if (aml_present())
 +    m_simpleConditions.insert("have_amcodec");
++  if (aml_get_cpufamily_id() >= AML_G12A)
++    m_simpleConditions.insert("have_4k_gui");
 +#endif
  #if defined(TARGET_WINDOWS)
    m_simpleConditions.insert("has_dx");
@@ -8117,10 +8259,10 @@ index f56ebe9a40..b5d6c2b1c0 100644
    static const std::string SETTING_CACHEVIDEO_LAN;
 diff --git a/xbmc/utils/AMLUtils.cpp b/xbmc/utils/AMLUtils.cpp
 new file mode 100644
-index 0000000000..ae034e9741
+index 0000000000..a646b37d3a
 --- /dev/null
 +++ b/xbmc/utils/AMLUtils.cpp
-@@ -0,0 +1,720 @@
+@@ -0,0 +1,734 @@
 +/*
 + *  Copyright (C) 2011-2018 Team Kodi
 + *  This file is part of Kodi - https://kodi.tv
@@ -8165,6 +8307,17 @@ index 0000000000..ae034e9741
 +      CLog::Log(LOGNOTICE, "AML device detected");
 +  }
 +  return has_aml == 1;
++}
++
++int aml_get_cpufamily_id()
++{
++  static int aml_cpufamily_id = -1;
++  if (aml_cpufamily_id == -1)
++  {
++    std::string cpu_family = CServiceBroker::GetCPUInfo()->GetCPUSerial().substr (0,2);
++    aml_cpufamily_id = std::stoi (cpu_family,nullptr,16);
++  }
++  return aml_cpufamily_id;
 +}
 +
 +bool aml_permissions()
@@ -8656,19 +8809,22 @@ index 0000000000..ae034e9741
 +
 +  if (aml_has_frac_rate_policy())
 +  {
-+    if (cur_mode == mode)
-+      SysfsUtils::SetString("/sys/class/display/mode", "null");
-+
++    int cur_fractional_rate;
 +    int fractional_rate = (res.fRefreshRate == floor(res.fRefreshRate)) ? 0 : 1;
-+    SysfsUtils::SetInt("/sys/class/amhdmitx/amhdmitx0/frac_rate_policy", fractional_rate);
-+  }
-+  else if (cur_mode == mode)
-+  {
-+    // Don't set the same mode as current
-+    return true;
++    SysfsUtils::GetInt("/sys/class/amhdmitx/amhdmitx0/frac_rate_policy", cur_fractional_rate);
++
++    if (cur_fractional_rate != fractional_rate)
++    {
++      cur_mode = "null";
++      SysfsUtils::SetString("/sys/class/display/mode", cur_mode.c_str());
++      SysfsUtils::SetInt("/sys/class/amhdmitx/amhdmitx0/frac_rate_policy", fractional_rate);
++    }
 +  }
 +
-+  SysfsUtils::SetString("/sys/class/display/mode", mode.c_str());
++  if (cur_mode != mode)
++  {
++    SysfsUtils::SetString("/sys/class/display/mode", mode.c_str());
++  }
 +
 +  aml_set_framebuffer_resolution(res, framebuffer_name);
 +
@@ -8843,10 +8999,10 @@ index 0000000000..ae034e9741
 +
 diff --git a/xbmc/utils/AMLUtils.h b/xbmc/utils/AMLUtils.h
 new file mode 100644
-index 0000000000..17aedb0900
+index 0000000000..d6d2b6cdd8
 --- /dev/null
 +++ b/xbmc/utils/AMLUtils.h
-@@ -0,0 +1,68 @@
+@@ -0,0 +1,76 @@
 +/*
 + *  Copyright (C) 2011-2018 Team Kodi
 + *  This file is part of Kodi - https://kodi.tv
@@ -8890,7 +9046,15 @@ index 0000000000..17aedb0900
 +  AML_HAS_H264_4K2K_SAME_PROFILE
 +};
 +
++#define AML_GXBB    0x1F
++#define AML_GXL     0x21
++#define AML_GXM     0x22
++#define AML_G12A    0x28
++#define AML_G12B    0x29
++#define AML_SM1     0x2B
++
 +bool aml_present();
++int  aml_get_cpufamily_id();
 +bool aml_permissions();
 +bool aml_support_hevc();
 +bool aml_support_hevc_4k2k();

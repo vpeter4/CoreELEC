@@ -984,6 +984,19 @@ index 1b02def93b..aceb9e698e 100644
  	</include>
  	<include name="OpenClose_FadeSlide_Right">
  		<animation type="WindowOpen">
+diff --git a/addons/skin.estuary/xml/Includes_Home.xml b/addons/skin.estuary/xml/Includes_Home.xml
+index 8abe7844a2..e64ce81767 100644
+--- a/addons/skin.estuary/xml/Includes_Home.xml
++++ b/addons/skin.estuary/xml/Includes_Home.xml
+@@ -859,7 +859,7 @@
+ 			<property name="FanartCode">$INFO[Window(weather).Property(Day$PARAM[item_index].FanartCode)]</property>
+ 			<thumb>$INFO[Window(weather).Property(Day$PARAM[item_index].OutlookIcon)]</thumb>
+ 			<onclick>noop</onclick>
+-			<visible>String.IsEmpty(Window(weather).Property(Daily.IsFetched)) + !String.IsEmpty(Window(weather).Property(Day$PARAM[item_index].Outlook))</visible>
++			<visible>String.IsEmpty(Window(weather).Property(Daily.IsFetched))!String.IsEmpty(Window(weather).Property(Day$PARAM[item_index].Outlook))</visible>
+ 		</item>
+ 	</include>
+ 	<include name="WeatherMapItem">
 diff --git a/addons/skin.estuary/xml/Settings.xml b/addons/skin.estuary/xml/Settings.xml
 index 18ad10234b..9227cbe2ce 100644
 --- a/addons/skin.estuary/xml/Settings.xml
@@ -2057,7 +2070,7 @@ index 80f3277610..3627d50d08 100644
  VERSION_MINOR 0
  VERSION_TAG ALPHA1
 diff --git a/xbmc/Application.cpp b/xbmc/Application.cpp
-index 4f6b91f29d..654c0fc96d 100644
+index ed44da24ed..50c4641606 100644
 --- a/xbmc/Application.cpp
 +++ b/xbmc/Application.cpp
 @@ -185,6 +185,10 @@
@@ -2156,7 +2169,7 @@ index 4f6b91f29d..654c0fc96d 100644
      CLog::Log(LOGINFO, "Stopping all");
  
      // cancel any jobs from the jobmanager
-@@ -4213,7 +4241,7 @@ void CApplication::ProcessSlow()
+@@ -4218,7 +4246,7 @@ void CApplication::ProcessSlow()
    if (CPlatformPosix::TestQuitFlag())
    {
      CLog::Log(LOGINFO, "Quitting due to POSIX signal");
@@ -2165,7 +2178,7 @@ index 4f6b91f29d..654c0fc96d 100644
    }
  #endif
  
-@@ -4683,7 +4711,6 @@ bool CApplication::SwitchToFullScreen(bool force /* = false */)
+@@ -4688,7 +4716,6 @@ bool CApplication::SwitchToFullScreen(bool force /* = false */)
  
  void CApplication::Minimize()
  {
@@ -2185,24 +2198,6 @@ index 5f94dd3e07..3d11c4fa37 100644
    void Stop(int exitCode);
    void UnloadSkin(bool forReload = false);
    bool LoadCustomWindows();
-diff --git a/xbmc/FileItem.cpp b/xbmc/FileItem.cpp
-index ab14fa3355..d0a86211a8 100644
---- a/xbmc/FileItem.cpp
-+++ b/xbmc/FileItem.cpp
-@@ -668,13 +668,6 @@ void CFileItem::Serialize(CVariant& value) const
- 
-   if (m_gameInfoTag)
-     (*m_gameInfoTag).Serialize(value["gameInfoTag"]);
--
--  if (!m_mapProperties.empty())
--  {
--    auto& customProperties = value["customproperties"];
--    for (const auto& prop : m_mapProperties)
--      customProperties[prop.first] = prop.second;
--  }
- }
- 
- void CFileItem::ToSortable(SortItem &sortable, Field field) const
 diff --git a/xbmc/GUIInfoManager.cpp b/xbmc/GUIInfoManager.cpp
 index 1d112c4dd2..ef1974f0c8 100644
 --- a/xbmc/GUIInfoManager.cpp
@@ -2729,7 +2724,7 @@ index 9bf0733cdf..cd32b8f2a4 100644
    {
      // we don't trust ELD information and push back our supported formats explicitly
 diff --git a/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.cpp b/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.cpp
-index 9034e27a6a..c04a54bbe3 100644
+index 10efd5a43a..2b82940702 100644
 --- a/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.cpp
 +++ b/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.cpp
 @@ -23,6 +23,8 @@
@@ -2766,7 +2761,7 @@ index 9034e27a6a..c04a54bbe3 100644
  static int AEStreamFormatToATFormat(const CAEStreamInfo::DataType& dt)
  {
    switch (dt)
-@@ -405,6 +425,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
+@@ -411,6 +431,10 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
        atChannelMask = CJNIAudioFormat::CHANNEL_OUT_STEREO;
    }
  
@@ -2777,7 +2772,7 @@ index 9034e27a6a..c04a54bbe3 100644
    while (!m_at_jni)
    {
      CLog::Log(LOGINFO, "Trying to open: samplerate: %u, channelMask: %d, encoding: %d",
-@@ -482,8 +506,28 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
+@@ -488,8 +512,28 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
      }
      else
      {
@@ -2806,7 +2801,7 @@ index 9034e27a6a..c04a54bbe3 100644
        // aim at 200 ms buffer and 50 ms periods
        m_audiotrackbuffer_sec =
            static_cast<double>(m_min_buffer_size) / (m_sink_frameSize * m_sink_sampleRate);
-@@ -598,7 +642,16 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
+@@ -604,7 +648,16 @@ void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
    // and add head_pos which wrapped around, e.g. 0x0001 0000 0000 -> 0x0001 0000 0004
    m_headPos = (m_headPos & UINT64_UPPER_BYTES) | (uint64_t)head_pos;
  
@@ -2824,7 +2819,7 @@ index 9034e27a6a..c04a54bbe3 100644
  
    // if sink is run dry without buffer time written anymore
    if (gone > m_duration_written)
-@@ -990,6 +1043,25 @@ void CAESinkAUDIOTRACK::UpdateAvailablePassthroughCapabilities(bool isRaw)
+@@ -996,6 +1049,25 @@ void CAESinkAUDIOTRACK::UpdateAvailablePassthroughCapabilities(bool isRaw)
        }
      }
  
@@ -2850,8 +2845,8 @@ index 9034e27a6a..c04a54bbe3 100644
      if (CJNIAudioManager::GetSDKVersion() >= 23)
      {
        if (CJNIAudioFormat::ENCODING_DTS_HD != -1)
-@@ -1078,15 +1150,21 @@ void CAESinkAUDIOTRACK::UpdateAvailablePCMCapabilities()
-     CLog::Log(LOGINFO, "Float is supported");
+@@ -1092,15 +1164,21 @@ void CAESinkAUDIOTRACK::UpdateAvailablePCMCapabilities()
+     CLog::Log(LOGNOTICE, "Multi channel Float is supported");
    }
  
 -  int test_sample[] = { 32000, 44100, 48000, 88200, 96000, 176400, 192000 };
@@ -2880,7 +2875,7 @@ index 9034e27a6a..c04a54bbe3 100644
    }
    std::copy(m_sink_sampleRates.begin(), m_sink_sampleRates.end(), std::back_inserter(m_info.m_sampleRates));
 diff --git a/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.h b/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.h
-index 88ae3be1b4..adb5c62cdb 100644
+index 6409c42c23..24d9eb0dc6 100644
 --- a/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.h
 +++ b/xbmc/cores/AudioEngine/Sinks/AESinkAUDIOTRACK.h
 @@ -49,6 +49,7 @@ protected:
@@ -7730,6 +7725,19 @@ index a5292d87d4..55cf684188 100644
                         CORE_PLATFORM_NAME_LC STREQUAL gbm OR
                         CORE_PLATFORM_NAME_LC STREQUAL x11 OR
                         CORE_PLATFORM_NAME_LC STREQUAL wayland))
+diff --git a/xbmc/dbwrappers/qry_dat.cpp b/xbmc/dbwrappers/qry_dat.cpp
+index 032002a9cb..bc68d2d79e 100644
+--- a/xbmc/dbwrappers/qry_dat.cpp
++++ b/xbmc/dbwrappers/qry_dat.cpp
+@@ -533,7 +533,7 @@ double field_value::get_asDouble() const {
+ int64_t field_value::get_asInt64() const {
+     switch (field_type) {
+     case ft_String: {
+-      return std::atoll(str_value.c_str());
++      return std::stoll(str_value);
+     }
+     case ft_Boolean:{
+       return (int64_t)bool_value;
 diff --git a/xbmc/guilib/GUIWindowManager.cpp b/xbmc/guilib/GUIWindowManager.cpp
 index 350fbdd089..4aef80baa3 100644
 --- a/xbmc/guilib/GUIWindowManager.cpp
@@ -7853,56 +7861,6 @@ index 252cd1d9b0..22e01dc8a9 100644
    //Todo wait until running
  
    return true;
-diff --git a/xbmc/interfaces/json-rpc/schema/types.json b/xbmc/interfaces/json-rpc/schema/types.json
-index 21a2347ed1..bf755dc5bf 100644
---- a/xbmc/interfaces/json-rpc/schema/types.json
-+++ b/xbmc/interfaces/json-rpc/schema/types.json
-@@ -397,10 +397,6 @@
-       "label": { "type": "string", "required": true }
-     }
-   },
--  "Item.CustomProperties": {
--    "type": "object",
--    "additionalProperties": { "$ref": "Global.String.NotEmpty" }
--  },
-   "Media.Details.Base": {
-     "extends": "Item.Details.Base",
-     "properties": {
-@@ -1531,8 +1527,7 @@
-       "bitrate": { "type": "integer" },
-       "samplerate": { "type": "integer" },
-       "channels": { "type": "integer"},
--      "albumstatus": { "type": "string" },
--      "customproperties": { "$ref": "Item.CustomProperties" }
-+      "albumstatus": { "type": "string" }
-     }
-   },
-   "List.Fields.All": {
-@@ -1555,7 +1550,7 @@
-                 "contributors", "displaycomposer", "displayconductor", "displayorchestra", "displaylyricist",
-                 "userrating", "votes", "sortartist", "musicbrainzreleasegroupid", "mediapath", "dynpath",
-                 "isboxset", "totaldiscs", "disctitle", "releasedate", "originaldate", "bpm",
--                "bitrate", "samplerate", "channels", "albumstatus", "datemodified", "datenew", "customproperties"]
-+                "bitrate", "samplerate", "channels", "albumstatus", "datemodified", "datenew"]
-     }
-   },
-   "List.Item.All": {
-@@ -1587,7 +1582,7 @@
-                 "episodeguide", "uniqueid", "dateadded", "size", "lastmodified", "mimetype",
-                 "specialsortseason", "specialsortepisode", "sortartist", "musicbrainzreleasegroupid",
-                 "isboxset", "totaldiscs", "disctitle", "releasedate", "originaldate", "bpm",
--                "bitrate", "samplerate", "channels", "datemodified", "datenew", "customproperties"]
-+                "bitrate", "samplerate", "channels", "datemodified", "datenew"]
-     }
-   },
-   "List.Item.File": {
-diff --git a/xbmc/interfaces/json-rpc/schema/version.txt b/xbmc/interfaces/json-rpc/schema/version.txt
-index 1b9bbc7425..6fb712b06f 100644
---- a/xbmc/interfaces/json-rpc/schema/version.txt
-+++ b/xbmc/interfaces/json-rpc/schema/version.txt
-@@ -1 +1 @@
--JSONRPC_VERSION 11.12.0
-+JSONRPC_VERSION 11.11.0
 diff --git a/xbmc/network/NetworkServices.cpp b/xbmc/network/NetworkServices.cpp
 index 801c0d65ac..92fc0497be 100644
 --- a/xbmc/network/NetworkServices.cpp
