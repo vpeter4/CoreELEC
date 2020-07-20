@@ -19,6 +19,7 @@ fi
 
 mount -o rw,remount $BOOT_ROOT
 
+DT_ID=""
 SUBDEVICE=""
 
 for arg in $(cat /proc/cmdline); do
@@ -39,33 +40,53 @@ for arg in $(cat /proc/cmdline); do
 
       if [ -f "/proc/device-tree/coreelec-dt-id" ]; then
         DT_ID=$(cat /proc/device-tree/coreelec-dt-id)
+        [ -n "$DT_ID" ] && SUBDEVICE="Generic"
       elif [ -f "/proc/device-tree/le-dt-id" ]; then
         DT_ID=$(cat /proc/device-tree/le-dt-id)
       fi
 
+      MIGRATE_DTB=""
       if [ -n "$DT_ID" ]; then
         case $DT_ID in
-          *odroid_n2*)
+          g12b_s922x_odroid_n2_dvb)
+            DT_ID="g12b_s922x_odroid_n2"
             SUBDEVICE="Odroid_N2"
+            MIGRATE_DTB="LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s \
+              '$BOOT_ROOT/dtb.img' /dvb status okay"
             ;;
+          g12b_s922x_odroid_n2plus_dvb)
+            DT_ID="g12b_s922x_odroid_n2plus"
+            SUBDEVICE="Odroid_N2"
+            MIGRATE_DTB="LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s \
+              '$BOOT_ROOT/dtb.img' /dvb status okay"
+            ;;
+          sm1_s905x3_odroid_c4_dvb)
+            DT_ID="sm1_s905x3_odroid_c4"
+            MIGRATE_DTB="LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s \
+              '$BOOT_ROOT/dtb.img' /dvb status okay"
+            ;;
+          sm1_s905x3_4g_1gbit_slowsdio)
+            DT_ID="sm1_s905x3_4g_1gbit"
+            MIGRATE_DTB="LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s \
+              '$BOOT_ROOT/dtb.img' /sdio/sdio f_max 170000000"
+            ;;
+        esac
+
+        case $DT_ID in
           *odroid_c4*)
             SUBDEVICE="Odroid_C4"
             ;;
-          *lepotato)
-            SUBDEVICE="LePotato"
-            ;;
-          *)
-            SUBDEVICE="Generic"
-            ;;
         esac
+
+        if [ -f $SYSTEM_ROOT/usr/bin/convert_dtname ]; then
+          # set new DT_ID and SUBDEVICE
+          . $SYSTEM_ROOT/usr/bin/convert_dtname $DT_ID
+        fi
       fi
 
-      if [ -n "$DT_ID" -a -f "$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb" ]; then
-        UPDATE_DTB_SOURCE="$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb"
-      fi
-
-      if [ -f "$UPDATE_DTB_SOURCE" ]; then
-        echo "Updating device tree from $UPDATE_DTB_SOURCE..."
+      UPDATE_DTB_SOURCE="$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb"
+      if [ -n "$DT_ID" -a -f "$UPDATE_DTB_SOURCE" ]; then
+        echo "Updating device tree with $DT_ID.dtb..."
         case $BOOT_PART in
           /dev/coreelec)
             dd if=/dev/zero of=/dev/dtb bs=256k count=1 status=none
@@ -76,6 +97,7 @@ for arg in $(cat /proc/cmdline); do
             cp -f "$UPDATE_DTB_SOURCE" "$BOOT_ROOT/dtb.img"
             ;;
         esac
+        [ -n "$MIGRATE_DTB" ] && eval $MIGRATE_DTB
       fi
 
       for all_dtb in /flash/*.dtb ; do
@@ -113,7 +135,7 @@ if [ -d $BOOT_ROOT/device_trees ]; then
 fi
 
 if [ -f $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_boot.ini ]; then
-  echo "Updating boot.ini..."
+  echo "Updating boot.ini with ${SUBDEVICE}_boot.ini..."
   cp -p $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_boot.ini $BOOT_ROOT/boot.ini
   sed -e "s/@BOOT_UUID@/$BOOT_UUID/" \
       -e "s/@DISK_UUID@/$DISK_UUID/" \

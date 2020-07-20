@@ -30,7 +30,7 @@ case "$LINUX" in
     PKG_SHA256="027ff518e60c7feef35194c0a1e86ef13ed801351243ee9b14e92b45f8056aa6"
     PKG_URL="https://github.com/CoreELEC/linux-amlogic/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
-    PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host"
+    PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host aml-dtbtools"
     PKG_DEPENDS_UNPACK="media_modules-aml"
     PKG_NEED_UNPACK="$PKG_NEED_UNPACK $(get_pkg_directory media_modules-aml)"
     PKG_BUILD_PERF="no"
@@ -236,11 +236,40 @@ make_target() {
   # Without that it'll contain only the symbols from the kernel
   kernel_make $KERNEL_TARGET $KERNEL_MAKE_EXTRACMD modules
 
-  for ce_dtb in arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/coreelec-*; do
+  DTB_PATH="arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic"
+
+  for ce_dtb in $DTB_PATH/coreelec-*; do
     if [ -d $ce_dtb ]; then
-      cp $ce_dtb/*.dtb arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic 2>/dev/null
+      cp $ce_dtb/*.dtb $DTB_PATH 2>/dev/null
     fi
   done
+
+  MULTIDTB_XML="$PROJECT_DIR/$PROJECT/multidtb.xml"
+  if [ -f $MULTIDTB_XML ]; then
+    multidtb_cnt=$(xmlstarlet sel -t -c "count(//dtb/multidtb)" $MULTIDTB_XML)
+    cnt_m=1
+    while [ $cnt_m -le $multidtb_cnt ]; do
+      multidtb=$(xmlstarlet sel -t -v "//dtb/multidtb[$cnt_m]/@name" $MULTIDTB_XML)
+      echo
+      echo "Making multidtb $multidtb"
+      rm -fr "$DTB_PATH/dtbtool_input"
+      mkdir $DTB_PATH/dtbtool_input
+
+      files_cnt=$(xmlstarlet sel -t -c "count(//dtb/multidtb[$cnt_m]/file)" $MULTIDTB_XML)
+      cnt_f=1
+      while [ $cnt_f -le $files_cnt ]; do
+        file=$(xmlstarlet sel -t -v "//dtb/multidtb[$cnt_m]/file[$cnt_f]" $MULTIDTB_XML)
+        cnt_f=$((cnt_f+1))
+        mv $DTB_PATH/$file $DTB_PATH/dtbtool_input
+      done
+
+      dtbTool -c -o $DTB_PATH/$multidtb $DTB_PATH/dtbtool_input
+      rm -fr "$DTB_PATH/dtbtool_input"
+      cnt_m=$((cnt_m+1))
+    done
+    mkdir -p $INSTALL/usr/share/bootloader
+    install -m 0644 $MULTIDTB_XML $INSTALL/usr/share/bootloader
+  fi
 
   if [ "$BUILD_ANDROID_BOOTIMG" = "yes" ]; then
     find_file_path bootloader/mkbootimg && source ${FOUND_PATH}

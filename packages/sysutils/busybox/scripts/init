@@ -1027,7 +1027,17 @@ check_amlogic_dtb() {
         DT_ID=$(cat /proc/device-tree/le-dt-id 2>/dev/null)
       else
         DT_ID=$(cat /proc/device-tree/coreelec-dt-id 2>/dev/null)
+
+       if [ -n "$DT_ID" -a -f /sysroot/usr/bin/convert_dtname ]; then
+          # set new DT_ID
+          [ -n "$SYSTEM_ROOT" ] && SYSTEM_ROOT_ORIG="$SYSTEM_ROOT"
+          SYSTEM_ROOT=/sysroot
+          . $SYSTEM_ROOT/usr/bin/convert_dtname $DT_ID
+          [ -n "$SYSTEM_ROOT_ORIG" ] && SYSTEM_ROOT="$SYSTEM_ROOT_ORIG"
+          unset SYSTEM_ROOT_ORIG
+        fi
       fi
+
       DT_FILE=$(ls -1 /sysroot/usr/share/bootloader/device_trees/${DT_ID}.dtb 2>/dev/null | head -n 1)
 
       if [ -f "/proc/device-tree/coreelec" ] &&
