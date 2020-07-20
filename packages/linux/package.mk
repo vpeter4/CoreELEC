@@ -30,7 +30,7 @@ case "$LINUX" in
     PKG_SHA256="e672f7de37dfcf2a482f8f0d419550f27c2513fa2809e4be43bcafd7a280c301"
     PKG_URL="https://github.com/CoreELEC/linux-amlogic/archive/$PKG_VERSION.tar.gz"
     PKG_SOURCE_NAME="linux-$LINUX-$PKG_VERSION.tar.gz"
-    PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host"
+    PKG_DEPENDS_TARGET="$PKG_DEPENDS_TARGET aml-dtbtools:host aml-dtbtools"
     PKG_DEPENDS_UNPACK="media_modules-aml"
     PKG_NEED_UNPACK="$PKG_NEED_UNPACK $(get_pkg_directory media_modules-aml)"
     PKG_BUILD_PERF="no"
@@ -280,9 +280,43 @@ make_target() {
 makeinstall_target() {
   if [ "$BOOTLOADER" = "u-boot" ]; then
     mkdir -p $INSTALL/usr/share/bootloader/device_trees
-    if [ -d arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic ]; then
+
+    DTB_PATH="arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic"
+    if [ -d $DTB_PATH ]; then
+      MULTIDTB_XML="$PROJECT_DIR/$PROJECT/multidtb.xml"
+      if [ -f $MULTIDTB_XML ]; then
+        multidtb_cnt=$(xmlstarlet sel -t -c "count(//dtb/multidtb)" $MULTIDTB_XML)
+        cnt_m=1
+        while [ $cnt_m -le $multidtb_cnt ]; do
+          multidtb=$(xmlstarlet sel -t -v "//dtb/multidtb[$cnt_m]/@name" $MULTIDTB_XML)
+          echo
+          echo "Making multidtb $multidtb"
+          rm -fr "$DTB_PATH/dtbtool_input"
+          mkdir $DTB_PATH/dtbtool_input
+
+          files_cnt=$(xmlstarlet sel -t -c "count(//dtb/multidtb[$cnt_m]/file)" $MULTIDTB_XML)
+          cnt_f=1
+          while [ $cnt_f -le $files_cnt ]; do
+            file=$(xmlstarlet sel -t -v "//dtb/multidtb[$cnt_m]/file[$cnt_f]" $MULTIDTB_XML)
+            keep=$(xmlstarlet sel -t -v "//dtb/multidtb[$cnt_m]/file[$cnt_f]/@keep" $MULTIDTB_XML)
+            cnt_f=$((cnt_f+1))
+
+            if [ "$keep" = "yes" ]; then
+              cp $DTB_PATH/$file $DTB_PATH/dtbtool_input
+            else
+              mv $DTB_PATH/$file $DTB_PATH/dtbtool_input
+            fi
+          done
+
+          dtbTool -c -o $DTB_PATH/$multidtb $DTB_PATH/dtbtool_input
+          rm -fr "$DTB_PATH/dtbtool_input"
+          cp -p $MULTIDTB_XML $INSTALL/usr/share/bootloader
+          cnt_m=$((cnt_m+1))
+        done
+      fi
+
       cp arch/$TARGET_KERNEL_ARCH/boot/*dtb.img $INSTALL/usr/share/bootloader/ 2>/dev/null || :
-      [ "$PROJECT" = "Amlogic-ng" ] && cp arch/$TARGET_KERNEL_ARCH/boot/dts/amlogic/*.dtb $INSTALL/usr/share/bootloader/device_trees 2>/dev/null || :
+      [ "$PROJECT" = "Amlogic-ng" ] && cp $DTB_PATH/*.dtb $INSTALL/usr/share/bootloader/device_trees 2>/dev/null || :
     fi
   elif [ "$BOOTLOADER" = "bcm2835-bootloader" ]; then
     mkdir -p $INSTALL/usr/share/bootloader/overlays

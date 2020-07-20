@@ -1,0 +1,23 @@
+<dtb>
+  <multidtb name="beelink_gt_king.dtb" subdevice="">
+    <file keep="0">g12b_s922x_beelink_gt_king_rev_a.dtb</file>
+    <file keep="0">g12b_s922x_beelink_gt_king.dtb</file>
+  </multidtb>
+  <multidtb name="beelink_gt1mini2.dtb" subdevice="">
+    <file keep="1">sm1_s905x3_2g_1gbit.dtb</file>
+    <file keep="1">sm1_s905x3_4g_1gbit.dtb</file>
+  </multidtb>
+  <multidtb name="odroid_n2.dtb" subdevice="Odroid_N2">
+    <file keep="0">g12b_s922x_odroid_n2.dtb</file>
+    <file keep="0">g12b_s922x_odroid_n2plus.dtb</file>
+  </multidtb>
+  <multidtb name="odroid_n2_dvb.dtb" subdevice="Odroid_N2">
+    <file keep="0">g12b_s922x_odroid_n2_dvb.dtb</file>
+    <file keep="0">g12b_s922x_odroid_n2plus_dvb.dtb</file>
+  </multidtb>
+  <multidtb name="ugoos_am6.dtb" subdevice="">
+    <file keep="0">g12b_s922x_ugoos_am6_rev_a.dtb</file>
+    <file keep="0">g12b_s922x_ugoos_am6.dtb</file>
+  </multidtb>
+</dtb>
+

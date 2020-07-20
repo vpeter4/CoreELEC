@@ -19,6 +19,7 @@ fi
 
 mount -o rw,remount $BOOT_ROOT
 
+DT_ID=""
 SUBDEVICE=""
 
 for arg in $(cat /proc/cmdline); do
@@ -39,33 +40,30 @@ for arg in $(cat /proc/cmdline); do
 
       if [ -f "/proc/device-tree/coreelec-dt-id" ]; then
         DT_ID=$(cat /proc/device-tree/coreelec-dt-id)
+        [ -n "$DT_ID" ] && SUBDEVICE="Generic"
       elif [ -f "/proc/device-tree/le-dt-id" ]; then
         DT_ID=$(cat /proc/device-tree/le-dt-id)
       fi
 
+      if [ -n "$DT_ID" -a -f $SYSTEM_ROOT/usr/bin/convert_dtname ]; then
+        # set new DT_ID and SUBDEVICE
+        . $SYSTEM_ROOT/usr/bin/convert_dtname $DT_ID
+      fi
+
       if [ -n "$DT_ID" ]; then
         case $DT_ID in
-          *odroid_n2*)
-            SUBDEVICE="Odroid_N2"
-            ;;
           *odroid_c4*)
             SUBDEVICE="Odroid_C4"
             ;;
           *lepotato)
             SUBDEVICE="LePotato"
             ;;
-          *)
-            SUBDEVICE="Generic"
-            ;;
         esac
       fi
 
-      if [ -n "$DT_ID" -a -f "$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb" ]; then
-        UPDATE_DTB_SOURCE="$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb"
-      fi
-
-      if [ -f "$UPDATE_DTB_SOURCE" ]; then
-        echo "Updating device tree from $UPDATE_DTB_SOURCE..."
+      UPDATE_DTB_SOURCE="$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb"
+      if [ -n "$DT_ID" -a -f "$UPDATE_DTB_SOURCE" ]; then
+        echo "Updating device tree with $UPDATE_DTB_SOURCE..."
         case $BOOT_PART in
           /dev/coreelec)
             dd if=/dev/zero of=/dev/dtb bs=256k count=1 status=none
@@ -113,7 +111,7 @@ if [ -d $BOOT_ROOT/device_trees ]; then
 fi
 
 if [ -f $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_boot.ini ]; then
-  echo "Updating boot.ini..."
+  echo "Updating boot.ini with ${SUBDEVICE}_boot.ini..."
   cp -p $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_boot.ini $BOOT_ROOT/boot.ini
   sed -e "s/@BOOT_UUID@/$BOOT_UUID/" \
       -e "s/@DISK_UUID@/$DISK_UUID/" \
