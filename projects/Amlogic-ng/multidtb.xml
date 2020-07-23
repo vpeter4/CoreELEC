@@ -4,8 +4,8 @@
     <file keep="0">g12b_s922x_beelink_gt_king.dtb</file>
   </multidtb>
   <multidtb name="beelink_gt1mini2.dtb" subdevice="">
-    <file keep="1">sm1_s905x3_2g_1gbit.dtb</file>
-    <file keep="1">sm1_s905x3_4g_1gbit.dtb</file>
+    <file keep="0">sm1_s905x3_beelink_gt1mini2_2g.dtb</file>
+    <file keep="0">sm1_s905x3_beelink_gt1mini2_4g.dtb</file>
   </multidtb>
   <multidtb name="odroid_n2.dtb" subdevice="Odroid_N2">
     <file keep="0">g12b_s922x_odroid_n2.dtb</file>
