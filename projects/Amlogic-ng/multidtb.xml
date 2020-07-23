@@ -11,10 +11,6 @@
     <file keep="0">g12b_s922x_odroid_n2.dtb</file>
     <file keep="0">g12b_s922x_odroid_n2plus.dtb</file>
   </multidtb>
-  <multidtb name="odroid_n2_dvb.dtb" subdevice="Odroid_N2">
-    <file keep="0">g12b_s922x_odroid_n2_dvb.dtb</file>
-    <file keep="0">g12b_s922x_odroid_n2plus_dvb.dtb</file>
-  </multidtb>
   <multidtb name="ugoos_am6.dtb" subdevice="">
     <file keep="0">g12b_s922x_ugoos_am6_rev_a.dtb</file>
     <file keep="0">g12b_s922x_ugoos_am6.dtb</file>

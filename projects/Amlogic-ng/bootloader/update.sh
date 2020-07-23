@@ -52,6 +52,23 @@ for arg in $(cat /proc/cmdline); do
 
       if [ -n "$DT_ID" ]; then
         case $DT_ID in
+          g12b_s922x_odroid_n2_dvb)
+            DT_ID="g12b_s922x_odroid_n2"
+            SUBDEVICE="Odroid_N2"
+            LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s /dvb status okay
+            ;;
+          g12b_s922x_odroid_n2plus_dvb)
+            DT_ID="g12b_s922x_odroid_n2plus"
+            SUBDEVICE="Odroid_N2"
+            LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s /dvb status okay
+            ;;
+          sm1_s905x3_odroid_c4_dvb)
+            DT_ID="sm1_s905x3_odroid_c4"
+            LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s /dvb status okay
+            ;;
+        esac
+
+        case $DT_ID in
           *odroid_c4*)
             SUBDEVICE="Odroid_C4"
             ;;
