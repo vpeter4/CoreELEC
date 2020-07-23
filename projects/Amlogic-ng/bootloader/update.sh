@@ -66,6 +66,16 @@ for arg in $(cat /proc/cmdline); do
             DT_ID="sm1_s905x3_odroid_c4"
             LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s /dvb status okay
             ;;
+          sm1_s905x3_4g_1gbit_slowsdio)
+            DT_ID="sm1_s905x3_4g_1gbit"
+            LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t u /sdio/sdio f_max 170000000
+            ;;
+          gxl_p212_1g_slowemmc)
+            DT_ID="gxl_p212_1g"
+            ;;
+          gxl_p212_2g_slowemmc)
+            DT_ID="gxl_p212_2g"
+            ;;
         esac
 
         case $DT_ID in
