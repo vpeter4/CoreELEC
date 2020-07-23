@@ -1,0 +1,38 @@
+From 9f59d8aa549edfd89874b35fbccce04dccb877e6 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Thu, 23 Jul 2020 09:30:17 +0200
+Subject: [PATCH 2/6] dts: Odroid C4: enable i2c2 bus by default (used by dvb)
+
+---
+ arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4.dts     | 2 +-
+ arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4_dvb.dts | 4 ----
+ 2 files changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4.dts b/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4.dts
+index 00ab889bde4f..2d66b4f7ddb5 100644
+--- a/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4.dts
++++ b/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4.dts
+@@ -168,7 +168,7 @@
+ };
+ 
+ &i2c2 {
+-	status = "disabled";
++	status = "okay";
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&i2c2_master_pins1>;
+ 	clock-frequency = <100000>;
+diff --git a/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4_dvb.dts b/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4_dvb.dts
+index 68dbe8e011a7..ef7410f2e25f 100644
+--- a/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4_dvb.dts
++++ b/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4_dvb.dts
+@@ -45,7 +45,3 @@
+ 		};
+ 	};
+ };
+-
+-&i2c2 {
+-	status = "okay";
+-};
+-- 
+2.17.1
+

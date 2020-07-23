@@ -1,0 +1,42 @@
+From e77a1927fccc796c69013076504231746e4692f4 Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Thu, 23 Jul 2020 09:47:10 +0200
+Subject: [PATCH 3/6] dts: add stock freq for C4
+
+---
+ .../boot/dts/amlogic/sm1_s905x3_odroid_c4.dts | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4.dts b/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4.dts
+index 2d66b4f7ddb5..1c60b34dcb0c 100644
+--- a/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4.dts
++++ b/arch/arm64/boot/dts/amlogic/sm1_s905x3_odroid_c4.dts
+@@ -24,6 +24,25 @@
+ 		};
+ 	};
+ 
++	cpu_opp_table0: cpu_opp_table0 {
++		opp12 {
++			opp-hz = /bits/ 64 <2016000000>;
++			opp-microvolt = <1010000>;
++		};
++		opp13 {
++			opp-hz = /bits/ 64 <2100000000>;
++			opp-microvolt = <1030000>;
++		};
++	};
++
++	cpus:cpus {
++		cpu-map {
++			cluster0:cluster0 {
++				stock_freq = <1908000000>;
++			};
++		};
++	};
++
+ 	leds {
+ 		compatible = "gpio-leds";
+ 		blueled {
+-- 
+2.17.1
+
