@@ -1027,7 +1027,17 @@ check_amlogic_dtb() {
         DT_ID=$(cat /proc/device-tree/le-dt-id 2>/dev/null)
       else
         DT_ID=$(cat /proc/device-tree/coreelec-dt-id 2>/dev/null)
+
+       if [ -n "$DT_ID" -a -f /sysroot/usr/bin/convert_dtname ]; then
+          # set new DT_ID
+          [ -n "$SYSTEM_ROOT" ] && SYSTEM_ROOT_ORIG="$SYSTEM_ROOT"
+          SYSTEM_ROOT=/sysroot
+          . $SYSTEM_ROOT/usr/bin/convert_dtname $DT_ID
+          [ -n "$SYSTEM_ROOT_ORIG" ] && SYSTEM_ROOT="$SYSTEM_ROOT_ORIG"
+          unset SYSTEM_ROOT_ORIG
+        fi
       fi
+
       DT_FILE=$(ls -1 /sysroot/usr/share/bootloader/device_trees/${DT_ID}.dtb 2>/dev/null | head -n 1)
 
       if [ -f "/proc/device-tree/coreelec" ] &&
@@ -1078,9 +1088,6 @@ delete_descriptors() {
 }
 
 # Do init tasks to bring up system
-
-# hide kernel log messages on console
-echo '1 4 1 7' > /proc/sys/kernel/printk
 
 # set ondemand up_threshold
 if [ -e /sys/devices/system/cpu/cpufreq/ondemand/up_threshold ]; then
@@ -1159,6 +1166,9 @@ for arg in $(cat /proc/cmdline); do
     debugging)
       DEBUG=yes
       ;;
+    nopkmute)
+      MUTE_PRINTK=no
+      ;;
     progress)
       PROGRESS=yes
       INIT_ARGS="$INIT_ARGS --show-status=1"
@@ -1204,6 +1214,11 @@ for arg in $(cat /proc/cmdline); do
       ;;
   esac
 done
+
+# hide kernel log messages on console
+if [ ! "$MUTE_PRINTK" = "no" ]; then
+  echo '1 4 1 7' > /proc/sys/kernel/printk
+fi
 
 if test "$DEBUG" = "yes"; then
   exec 3>&1

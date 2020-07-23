@@ -19,6 +19,7 @@ fi
 
 mount -o rw,remount $BOOT_ROOT
 
+DT_ID=""
 SUBDEVICE=""
 
 for arg in $(cat /proc/cmdline); do
@@ -39,28 +40,57 @@ for arg in $(cat /proc/cmdline); do
 
       if [ -f "/proc/device-tree/coreelec-dt-id" ]; then
         DT_ID=$(cat /proc/device-tree/coreelec-dt-id)
+        [ -n "$DT_ID" ] && SUBDEVICE="Generic"
+      elif [ -f "/proc/device-tree/le-dt-id" ]; then
+        DT_ID=$(cat /proc/device-tree/le-dt-id)
+      fi
+
+      if [ -n "$DT_ID" -a -f $SYSTEM_ROOT/usr/bin/convert_dtname ]; then
+        # set new DT_ID and SUBDEVICE
+        . $SYSTEM_ROOT/usr/bin/convert_dtname $DT_ID
       fi
 
       if [ -n "$DT_ID" ]; then
         case $DT_ID in
-          *odroid_n2*)
+          g12b_s922x_odroid_n2_dvb)
+            DT_ID="g12b_s922x_odroid_n2"
             SUBDEVICE="Odroid_N2"
+            LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s /dvb status okay
             ;;
+          g12b_s922x_odroid_n2plus_dvb)
+            DT_ID="g12b_s922x_odroid_n2plus"
+            SUBDEVICE="Odroid_N2"
+            LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s /dvb status okay
+            ;;
+          sm1_s905x3_odroid_c4_dvb)
+            DT_ID="sm1_s905x3_odroid_c4"
+            LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s /dvb status okay
+            ;;
+          sm1_s905x3_4g_1gbit_slowsdio)
+            DT_ID="sm1_s905x3_4g_1gbit"
+            LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t u /sdio/sdio f_max 170000000
+            ;;
+          gxl_p212_1g_slowemmc)
+            DT_ID="gxl_p212_1g"
+            ;;
+          gxl_p212_2g_slowemmc)
+            DT_ID="gxl_p212_2g"
+            ;;
+        esac
+
+        case $DT_ID in
           *odroid_c4*)
             SUBDEVICE="Odroid_C4"
             ;;
-          *)
-            SUBDEVICE="Generic"
+          *lepotato)
+            SUBDEVICE="LePotato"
             ;;
         esac
       fi
 
-      if [ -n "$DT_ID" -a -f "$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb" ]; then
-        UPDATE_DTB_SOURCE="$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb"
-      fi
-
-      if [ -f "$UPDATE_DTB_SOURCE" ]; then
-        echo "Updating device tree from $UPDATE_DTB_SOURCE..."
+      UPDATE_DTB_SOURCE="$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb"
+      if [ -n "$DT_ID" -a -f "$UPDATE_DTB_SOURCE" ]; then
+        echo "Updating device tree with $UPDATE_DTB_SOURCE..."
         case $BOOT_PART in
           /dev/coreelec)
             dd if=/dev/zero of=/dev/dtb bs=256k count=1 status=none
@@ -108,7 +138,7 @@ if [ -d $BOOT_ROOT/device_trees ]; then
 fi
 
 if [ -f $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_boot.ini ]; then
-  echo "Updating boot.ini..."
+  echo "Updating boot.ini with ${SUBDEVICE}_boot.ini..."
   cp -p $SYSTEM_ROOT/usr/share/bootloader/${SUBDEVICE}_boot.ini $BOOT_ROOT/boot.ini
   sed -e "s/@BOOT_UUID@/$BOOT_UUID/" \
       -e "s/@DISK_UUID@/$DISK_UUID/" \
@@ -126,6 +156,13 @@ if [ "${SUBDEVICE}" == "Odroid_N2" -o "${SUBDEVICE}" == "Odroid_C4" ]; then
   if [ -f $SYSTEM_ROOT/usr/share/bootloader/hk-boot-logo-1080.bmp.gz ]; then
     echo "Updating boot logos..."
     cp -p $SYSTEM_ROOT/usr/share/bootloader/hk-boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
+  fi
+fi
+
+if [ "${SUBDEVICE}" == "LePotato" ]; then
+  if [ -f $SYSTEM_ROOT/usr/share/bootloader/boot-logo-1080.bmp.gz ]; then
+    echo "Updating boot logos..."
+    cp -p $SYSTEM_ROOT/usr/share/bootloader/boot-logo-1080.bmp.gz $BOOT_ROOT/boot-logo-1080.bmp.gz
   fi
 fi
 

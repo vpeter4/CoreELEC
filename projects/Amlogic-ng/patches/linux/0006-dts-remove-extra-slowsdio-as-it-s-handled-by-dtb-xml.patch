@@ -1,0 +1,93 @@
+From aa643eff1d05b71c60e46caa670b86d9c80a287c Mon Sep 17 00:00:00 2001
+From: Portisch <hugo.portisch@yahoo.de>
+Date: Thu, 23 Jul 2020 12:15:31 +0200
+Subject: [PATCH 6/6] dts: remove extra slowsdio as it's handled by dtb-xml
+
+---
+ arch/arm64/boot/dts/amlogic/Makefile                  |  3 ---
+ .../dts/amlogic/coreelec-gxl/gxl_p212_1g_slowemmc.dts | 11 -----------
+ .../dts/amlogic/coreelec-gxl/gxl_p212_2g_slowemmc.dts | 11 -----------
+ .../boot/dts/amlogic/sm1_s905x3_4g_1gbit_slowsdio.dts | 11 -----------
+ 4 files changed, 36 deletions(-)
+ delete mode 100644 arch/arm64/boot/dts/amlogic/coreelec-gxl/gxl_p212_1g_slowemmc.dts
+ delete mode 100644 arch/arm64/boot/dts/amlogic/coreelec-gxl/gxl_p212_2g_slowemmc.dts
+ delete mode 100644 arch/arm64/boot/dts/amlogic/sm1_s905x3_4g_1gbit_slowsdio.dts
+
+diff --git a/arch/arm64/boot/dts/amlogic/Makefile b/arch/arm64/boot/dts/amlogic/Makefile
+index f94e4a953aca..e685d16075c2 100644
+--- a/arch/arm64/boot/dts/amlogic/Makefile
++++ b/arch/arm64/boot/dts/amlogic/Makefile
+@@ -19,19 +19,16 @@ dtb-$(CONFIG_ARM64) += sm1_s905x3_2g.dtb
+ dtb-$(CONFIG_ARM64) += sm1_s905x3_2g_1gbit.dtb
+ dtb-$(CONFIG_ARM64) += sm1_s905x3_4g.dtb
+ dtb-$(CONFIG_ARM64) += sm1_s905x3_4g_1gbit.dtb
+-dtb-$(CONFIG_ARM64) += sm1_s905x3_4g_1gbit_slowsdio.dtb
+ dtb-$(CONFIG_ARM64) += sm1_s905x3_odroid_c4.dtb
+ dtb-$(CONFIG_ARM64) += sm1_s905x3_beelink_gt1mini2_2g.dtb
+ dtb-$(CONFIG_ARM64) += sm1_s905x3_beelink_gt1mini2_4g.dtb
+ dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p212_1g.dtb
+ dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p212_1g_lepotato.dtb
+ dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p212_1g_g9sx.dtb
+-dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p212_1g_slowemmc.dtb
+ dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p212_2g.dtb
+ dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p212_2g_lepotato.dtb
+ dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p212_2g_kvim.dtb
+ dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p212_2g_g9sx.dtb
+-dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p212_2g_slowemmc.dtb
+ dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p212_3g.dtb
+ dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p230_2g.dtb
+ dtb-$(CONFIG_ARM64) += coreelec-gxl/gxl_p230_k1_pro.dtb
+diff --git a/arch/arm64/boot/dts/amlogic/coreelec-gxl/gxl_p212_1g_slowemmc.dts b/arch/arm64/boot/dts/amlogic/coreelec-gxl/gxl_p212_1g_slowemmc.dts
+deleted file mode 100644
+index 7bb47959f279..000000000000
+--- a/arch/arm64/boot/dts/amlogic/coreelec-gxl/gxl_p212_1g_slowemmc.dts
++++ /dev/null
+@@ -1,11 +0,0 @@
+-#include "gxl_p212_1g.dts"
+-
+-/{
+-	coreelec-dt-id = "gxl_p212_1g_slowemmc";
+-
+-	emmc@d0074000 {
+-		emmc {
+-			caps2 = "MMC_CAP2_HS200";
+-		};
+-	};
+-};
+diff --git a/arch/arm64/boot/dts/amlogic/coreelec-gxl/gxl_p212_2g_slowemmc.dts b/arch/arm64/boot/dts/amlogic/coreelec-gxl/gxl_p212_2g_slowemmc.dts
+deleted file mode 100644
+index 03df4e24294c..000000000000
+--- a/arch/arm64/boot/dts/amlogic/coreelec-gxl/gxl_p212_2g_slowemmc.dts
++++ /dev/null
+@@ -1,11 +0,0 @@
+-#include "gxl_p212_2g.dts"
+-
+-/{
+-	coreelec-dt-id = "gxl_p212_2g_slowemmc";
+-
+-	emmc@d0074000 {
+-		emmc {
+-			caps2 = "MMC_CAP2_HS200";
+-		};
+-	};
+-};
+diff --git a/arch/arm64/boot/dts/amlogic/sm1_s905x3_4g_1gbit_slowsdio.dts b/arch/arm64/boot/dts/amlogic/sm1_s905x3_4g_1gbit_slowsdio.dts
+deleted file mode 100644
+index 61a9b2ac9129..000000000000
+--- a/arch/arm64/boot/dts/amlogic/sm1_s905x3_4g_1gbit_slowsdio.dts
++++ /dev/null
+@@ -1,11 +0,0 @@
+-#include "sm1_s905x3_4g_1gbit.dts"
+-
+-/{
+-	coreelec-dt-id = "sm1_s905x3_4g_1gbit_slowsdio";
+-};
+-
+-&sd_emmc_a {
+-	sdio {
+-		f_max = <170000000>;
+-	};
+-};
+-- 
+2.17.1
+
