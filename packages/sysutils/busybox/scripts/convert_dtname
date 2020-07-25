@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# SPDX-License-Identifier: GPL-2.0
+# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
+
+DT_ID=$1
+MULTIDTB_XML="$SYSTEM_ROOT/usr/share/bootloader/multidtb.xml"
+
+if [ -n "$DT_ID" -a -f $MULTIDTB_XML ]; then
+  multidtb_cnt=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
+    sel -t -c "count(//dtb/multidtb)" $MULTIDTB_XML)
+  cnt_m=1
+  while [ $cnt_m -le $multidtb_cnt ]; do
+    multidtb=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
+      sel -t -v "//dtb/multidtb[$cnt_m]/@name" $MULTIDTB_XML)
+    subdevice=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
+      sel -t -v "//dtb/multidtb[$cnt_m]/@subdevice" $MULTIDTB_XML)
+    files_cnt=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
+      sel -t -c "count(//dtb/multidtb[$cnt_m]/file)" $MULTIDTB_XML)
+    cnt_f=1
+    while [ $cnt_f -le $files_cnt ]; do
+      file=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
+        sel -t -v "//dtb/multidtb[$cnt_m]/file[$cnt_f]" $MULTIDTB_XML)
+      cnt_f=$((cnt_f+1))
+
+      if [ "${DT_ID}.dtb" = "$file" ]; then
+        echo "Device tree multidtb ${DT_ID}, ${multidtb%.*}"
+        DT_ID="${multidtb%%.*}"
+        [ -n "$subdevice" ] && SUBDEVICE="$subdevice"
+        break 2  # two for loops
+      fi
+    done
+    cnt_m=$((cnt_m+1))
+  done
+fi
