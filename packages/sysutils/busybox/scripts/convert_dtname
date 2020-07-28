@@ -1,12 +1,35 @@
 #!/bin/bash
 
 # SPDX-License-Identifier: GPL-2.0
-# Copyright (C) 2018-present Team CoreELEC (https://coreelec.org)
+# Copyright (C) 2020-present Team CoreELEC (https://coreelec.org)
 
 DT_ID=$1
 MULTIDTB_XML="$SYSTEM_ROOT/usr/share/bootloader/multidtb.xml"
 
 if [ -n "$DT_ID" -a -f $MULTIDTB_XML ]; then
+  # filter obsolete DT_ID and migrate to new DT_ID if possible
+  migratedtb_cnt=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
+    sel -t -c "count(//dtb/migratedtb)" $MULTIDTB_XML)
+  cnt_m=1
+  while [ $cnt_m -le $migratedtb_cnt ]; do
+    migratedtb=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
+      sel -t -v "//dtb/migratedtb[$cnt_m]/@coreelec-dt-id" $MULTIDTB_XML)
+    if [ "$DT_ID" == "$migratedtb" ]; then
+      subdevice=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
+        sel -t -v "//dtb/migratedtb[$cnt_m]/@subdevice" $MULTIDTB_XML)
+      migratedtid=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
+        sel -t -v "//dtb/migratedtb[$cnt_m]/migratedtid" $MULTIDTB_XML)
+      migratecmd=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
+        sel -t -v "//dtb/migratedtb[$cnt_m]/migratecmd" $MULTIDTB_XML)
+      DT_ID="$migratedtid"
+      SUBDEVICE="$subdevice"
+      MIGRATE_DTB="$migratecmd"
+      break
+    fi
+    cnt_m=$((cnt_m+1))
+  done
+
+  # convert DT_ID to used multi-dtb if available
   multidtb_cnt=$(LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/xmlstarlet \
     sel -t -c "count(//dtb/multidtb)" $MULTIDTB_XML)
   cnt_m=1

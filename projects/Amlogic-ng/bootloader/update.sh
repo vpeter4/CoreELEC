@@ -47,30 +47,10 @@ for arg in $(cat /proc/cmdline); do
 
       MIGRATE_DTB=""
       if [ -n "$DT_ID" ]; then
-        case $DT_ID in
-          g12b_s922x_odroid_n2_dvb)
-            DT_ID="g12b_s922x_odroid_n2"
-            SUBDEVICE="Odroid_N2"
-            MIGRATE_DTB="LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s \
-              '$BOOT_ROOT/dtb.img' /dvb status okay"
-            ;;
-          g12b_s922x_odroid_n2plus_dvb)
-            DT_ID="g12b_s922x_odroid_n2plus"
-            SUBDEVICE="Odroid_N2"
-            MIGRATE_DTB="LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s \
-              '$BOOT_ROOT/dtb.img' /dvb status okay"
-            ;;
-          sm1_s905x3_odroid_c4_dvb)
-            DT_ID="sm1_s905x3_odroid_c4"
-            MIGRATE_DTB="LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s \
-              '$BOOT_ROOT/dtb.img' /dvb status okay"
-            ;;
-          sm1_s905x3_4g_1gbit_slowsdio)
-            DT_ID="sm1_s905x3_4g_1gbit"
-            MIGRATE_DTB="LD_LIBRARY_PATH=$SYSTEM_ROOT/usr/lib $SYSTEM_ROOT/usr/bin/fdtput -t s \
-              '$BOOT_ROOT/dtb.img' /sdio/sdio f_max 170000000"
-            ;;
-        esac
+        if [ -f $SYSTEM_ROOT/usr/bin/convert_dtname ]; then
+          # set new DT_ID, SUBDEVICE and MIGRATE_DTB
+          . $SYSTEM_ROOT/usr/bin/convert_dtname -$DT_ID
+        fi
 
         case $DT_ID in
           *odroid_c4*)
@@ -80,11 +60,6 @@ for arg in $(cat /proc/cmdline); do
             SUBDEVICE="LaFrite"
             ;;
         esac
-
-        if [ -f $SYSTEM_ROOT/usr/bin/convert_dtname ]; then
-          # set new DT_ID and SUBDEVICE
-          . $SYSTEM_ROOT/usr/bin/convert_dtname $DT_ID
-        fi
       fi
 
       UPDATE_DTB_SOURCE="$SYSTEM_ROOT/usr/share/bootloader/device_trees/$DT_ID.dtb"
