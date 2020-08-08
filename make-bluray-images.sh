@@ -6,6 +6,8 @@ IMAGE_SUFFIX=vpeter-bd-$(date +%Y.%m.%d.%H.%M) RELEASE_NOTES=release_notes.txt P
 
 IMAGE_SUFFIX=vpeter-bd-$(date +%Y.%m.%d.%H.%M) RELEASE_NOTES=release_notes.txt PROJECT=Amlogic make
 
+PROJECT=Amlogic-ng ./scripts/create_addon jre.zulu
+PROJECT=Amlogic ./scripts/create_addon jre.zulu
 
 exit 0
 
