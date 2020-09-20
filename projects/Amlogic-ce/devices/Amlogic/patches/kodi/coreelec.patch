@@ -27,7 +27,7 @@ index c244baed71..459c305fe7 100644
  	<extension point="xbmc.addon.metadata">
  		<summary lang="af_ZA">Installeer Byvoegsels vanaf Kodi.tv</summary>
 diff --git a/addons/resource.language.en_gb/resources/strings.po b/addons/resource.language.en_gb/resources/strings.po
-index 40641cc001..bbfa830710 100644
+index 08b97f739a..5fe5ac855f 100644
 --- a/addons/resource.language.en_gb/resources/strings.po
 +++ b/addons/resource.language.en_gb/resources/strings.po
 @@ -615,7 +615,7 @@ msgstr ""
@@ -145,7 +145,7 @@ index 40641cc001..bbfa830710 100644
  
  #. pvr "channels" settings group label
  #: system/settings/settings.xml
-@@ -18179,12 +18249,22 @@ msgctxt "#36049"
+@@ -18167,12 +18237,22 @@ msgctxt "#36049"
  msgid "Remote button press release time (ms)"
  msgstr ""
  
@@ -169,7 +169,7 @@ index 40641cc001..bbfa830710 100644
  
  #: system/settings/settings.xml
  msgctxt "#36099"
-@@ -20142,7 +20222,13 @@ msgctxt "#36438"
+@@ -20130,7 +20210,13 @@ msgctxt "#36438"
  msgid "Any repositories"
  msgstr ""
  
@@ -184,7 +184,7 @@ index 40641cc001..bbfa830710 100644
  
  #. Description of setting "System -> Audio output -> Volume control steps" with label #1302
  #: system/settings/settings.xml
-@@ -20152,6 +20238,18 @@ msgstr ""
+@@ -20140,6 +20226,18 @@ msgstr ""
  
  #empty strings from id 36443 to 36459
  
@@ -203,7 +203,7 @@ index 40641cc001..bbfa830710 100644
  #. Description of settings with label #14112 "Enable event logging"
  #: system/settings/settings.xml
  msgctxt "#36460"
-@@ -21546,6 +21644,21 @@ msgstr ""
+@@ -21540,6 +21638,21 @@ msgstr ""
  #empty strings from id 38082 to 38099
  #strings 38082 to 38099 reserved for music library
  
@@ -225,7 +225,7 @@ index 40641cc001..bbfa830710 100644
  #. Description of section #14200 "Player""
  #: system/settings/settings.xml
  msgctxt "#38100"
-@@ -21882,7 +21995,27 @@ msgctxt "#38354"
+@@ -21876,7 +21989,27 @@ msgctxt "#38354"
  msgid "Unable to read xml file"
  msgstr ""
  
@@ -386,10 +386,10 @@ index e4dbcc5e87..0000000000
 -	<color name="selected">FF24C6C9</color>
 -</colors>
 diff --git a/addons/skin.estuary/language/resource.language.en_gb/strings.po b/addons/skin.estuary/language/resource.language.en_gb/strings.po
-index eb8eae26d5..422d8f8842 100644
+index c86dbe1e23..1733b12e53 100644
 --- a/addons/skin.estuary/language/resource.language.en_gb/strings.po
 +++ b/addons/skin.estuary/language/resource.language.en_gb/strings.po
-@@ -441,7 +441,7 @@ msgstr ""
+@@ -440,7 +440,7 @@ msgstr ""
  
  #: /xml/LoginScreen.xml
  msgctxt "#31098"
@@ -398,7 +398,7 @@ index eb8eae26d5..422d8f8842 100644
  msgstr ""
  
  #. viewtype name
-@@ -540,7 +540,7 @@ msgstr ""
+@@ -539,7 +539,7 @@ msgstr ""
  
  #: /xml/Home.xml
  msgctxt "#31119"
@@ -407,7 +407,7 @@ index eb8eae26d5..422d8f8842 100644
  msgstr ""
  
  #: /xml/Home.xml
-@@ -778,3 +778,18 @@ msgstr ""
+@@ -777,3 +777,18 @@ msgstr ""
  msgctxt "#31167"
  msgid "Animate background"
  msgstr ""
@@ -1009,7 +1009,7 @@ index 1b02def93b..aceb9e698e 100644
  	<include name="OpenClose_FadeSlide_Right">
  		<animation type="WindowOpen">
 diff --git a/addons/skin.estuary/xml/Settings.xml b/addons/skin.estuary/xml/Settings.xml
-index 18ad10234b..9227cbe2ce 100644
+index fa63b174b8..b77de6eaf9 100644
 --- a/addons/skin.estuary/xml/Settings.xml
 +++ b/addons/skin.estuary/xml/Settings.xml
 @@ -112,10 +112,10 @@
@@ -1019,16 +1019,16 @@ index 18ad10234b..9227cbe2ce 100644
 -						<label>LibreELEC</label>
 -						<onclick>RunAddon(service.libreelec.settings)</onclick>
 -						<icon>icons/settings/libreelec.png</icon>
--						<visible>System.HasAddon(service.libreelec.settings)</visible>
+-						<visible>System.AddonIsEnabled(service.libreelec.settings)</visible>
 +						<label>CoreELEC</label>
 +						<onclick>RunAddon(service.coreelec.settings)</onclick>
 +						<icon>icons/settings/coreelec.png</icon>
-+						<visible>System.HasAddon(service.coreelec.settings)</visible>
++						<visible>System.AddonIsEnabled(service.coreelec.settings)</visible>
  					</item>
  				</content>
  			</control>
 diff --git a/addons/skin.estuary/xml/SettingsSystemInfo.xml b/addons/skin.estuary/xml/SettingsSystemInfo.xml
-index 787c7f3900..8c4c571108 100644
+index a0bec86593..bd63f7f3e6 100644
 --- a/addons/skin.estuary/xml/SettingsSystemInfo.xml
 +++ b/addons/skin.estuary/xml/SettingsSystemInfo.xml
 @@ -207,7 +207,7 @@
@@ -1158,7 +1158,7 @@ index 787c7f3900..8c4c571108 100644
  		</control>
  	</controls>
 diff --git a/addons/skin.estuary/xml/SkinSettings.xml b/addons/skin.estuary/xml/SkinSettings.xml
-index 6c82f75339..bc429c9875 100644
+index 33ca748e9e..ee8d26caf0 100644
 --- a/addons/skin.estuary/xml/SkinSettings.xml
 +++ b/addons/skin.estuary/xml/SkinSettings.xml
 @@ -33,8 +33,8 @@
@@ -1958,10 +1958,10 @@ index 97dc1d3244..d70c713d51 100644
  
  if(APPLE)
 diff --git a/tools/depends/target/Makefile b/tools/depends/target/Makefile
-index 3827ffdee9..e736e7750c 100644
+index 405690ceab..c850bbb859 100644
 --- a/tools/depends/target/Makefile
 +++ b/tools/depends/target/Makefile
-@@ -70,13 +70,15 @@ ifeq ($(OS),linux)
+@@ -70,7 +70,7 @@ ifeq ($(OS),linux)
    DEPENDS += alsa-lib
    ALSA_LIB = alsa-lib
    LIBUUID = libuuid
@@ -1969,7 +1969,8 @@ index 3827ffdee9..e736e7750c 100644
 +  ifeq ($(TARGET_PLATFORM),$(filter $(TARGET_PLATFORM),raspberry-pi aml gbm))
      DEPENDS += libxkbcommon libinput libudev libevdev mtdev
    endif
- endif
+   ifeq ($(TARGET_PLATFORM),gbm)
+@@ -84,6 +84,8 @@ endif
  
  ifeq ($(TARGET_PLATFORM),wayland)
    DEPENDS += wayland waylandpp wayland-protocols
@@ -2093,7 +2094,7 @@ index 3b4e76bae2..0110542d75 100644
  VERSION_MINOR 0
  VERSION_TAG ALPHA1
 diff --git a/xbmc/Application.cpp b/xbmc/Application.cpp
-index ed44da24ed..50c4641606 100644
+index 3ac1680b32..f8580121d0 100644
 --- a/xbmc/Application.cpp
 +++ b/xbmc/Application.cpp
 @@ -185,6 +185,10 @@
@@ -2107,7 +2108,7 @@ index ed44da24ed..50c4641606 100644
  //TODO: XInitThreads
  #ifdef HAVE_X11
  #include <X11/Xlib.h>
-@@ -1133,6 +1137,19 @@ bool CApplication::OnSettingUpdate(std::shared_ptr<CSetting> setting, const char
+@@ -1135,6 +1139,19 @@ bool CApplication::OnSettingUpdate(std::shared_ptr<CSetting> setting, const char
    if (setting == NULL)
      return false;
  
@@ -2127,7 +2128,7 @@ index ed44da24ed..50c4641606 100644
  #if defined(TARGET_DARWIN_OSX)
    if (setting->GetId() == CSettings::SETTING_AUDIOOUTPUT_AUDIODEVICE)
    {
-@@ -2069,12 +2086,12 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
+@@ -2076,12 +2093,12 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
    switch (msg)
    {
    case TMSG_POWERDOWN:
@@ -2142,7 +2143,7 @@ index ed44da24ed..50c4641606 100644
      break;
  
    case TMSG_SHUTDOWN:
-@@ -2095,12 +2112,13 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
+@@ -2102,12 +2119,13 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
  
    case TMSG_RESTART:
    case TMSG_RESET:
@@ -2157,7 +2158,7 @@ index ed44da24ed..50c4641606 100644
      Stop(EXITCODE_RESTARTAPP);
  #endif
      break;
-@@ -2578,6 +2596,17 @@ bool CApplication::Cleanup()
+@@ -2585,6 +2603,17 @@ bool CApplication::Cleanup()
    }
  }
  
@@ -2175,7 +2176,7 @@ index ed44da24ed..50c4641606 100644
  void CApplication::Stop(int exitCode)
  {
    CLog::Log(LOGINFO, "Stopping player");
-@@ -2604,7 +2633,7 @@ void CApplication::Stop(int exitCode)
+@@ -2611,7 +2640,7 @@ void CApplication::Stop(int exitCode)
      m_frameMoveGuard.unlock();
  
      CVariant vExitCode(CVariant::VariantTypeObject);
@@ -2184,7 +2185,7 @@ index ed44da24ed..50c4641606 100644
      CServiceBroker::GetAnnouncementManager()->Announce(ANNOUNCEMENT::System, "xbmc", "OnQuit", vExitCode);
  
      // Abort any active screensaver
-@@ -2636,7 +2665,6 @@ void CApplication::Stop(int exitCode)
+@@ -2643,7 +2672,6 @@ void CApplication::Stop(int exitCode)
      // Needs cleaning up
      CApplicationMessenger::GetInstance().Stop();
      m_AppFocused = false;
@@ -2192,7 +2193,7 @@ index ed44da24ed..50c4641606 100644
      CLog::Log(LOGINFO, "Stopping all");
  
      // cancel any jobs from the jobmanager
-@@ -4218,7 +4246,7 @@ void CApplication::ProcessSlow()
+@@ -4228,7 +4256,7 @@ void CApplication::ProcessSlow()
    if (CPlatformPosix::TestQuitFlag())
    {
      CLog::Log(LOGINFO, "Quitting due to POSIX signal");
@@ -2201,7 +2202,7 @@ index ed44da24ed..50c4641606 100644
    }
  #endif
  
-@@ -4688,7 +4716,6 @@ bool CApplication::SwitchToFullScreen(bool force /* = false */)
+@@ -4698,7 +4726,6 @@ bool CApplication::SwitchToFullScreen(bool force /* = false */)
  
  void CApplication::Minimize()
  {
@@ -2222,7 +2223,7 @@ index 5f94dd3e07..3d11c4fa37 100644
    void UnloadSkin(bool forReload = false);
    bool LoadCustomWindows();
 diff --git a/xbmc/GUIInfoManager.cpp b/xbmc/GUIInfoManager.cpp
-index 9828b5b109..52d437a5d1 100644
+index aef925d6f9..af3e53929d 100644
 --- a/xbmc/GUIInfoManager.cpp
 +++ b/xbmc/GUIInfoManager.cpp
 @@ -957,7 +957,8 @@ const infomap player_process[] =
@@ -2266,7 +2267,7 @@ index 9828b5b109..52d437a5d1 100644
                                   {"friendlyname", SYSTEM_FRIENDLY_NAME},
                                   {"alarmpos", SYSTEM_ALARM_POS},
                                   {"isinhibit", SYSTEM_ISINHIBIT},
-@@ -9605,7 +9612,13 @@ int CGUIInfoManager::TranslateSingleString(const std::string &strCondition, bool
+@@ -9604,7 +9611,13 @@ int CGUIInfoManager::TranslateSingleString(const std::string &strCondition, bool
            return AddMultiInfo(CGUIInfo(SYSTEM_ADDON_VERSION, label, 1));
          }
          else if (prop.name == "idletime")
@@ -2440,10 +2441,10 @@ index e8fed4e5bc..e8be365b44 100644
  {
  public:
 diff --git a/xbmc/addons/AddonDatabase.cpp b/xbmc/addons/AddonDatabase.cpp
-index 39d48f73e7..6c528a2420 100644
+index c1fe3d7ae8..02bf06aede 100644
 --- a/xbmc/addons/AddonDatabase.cpp
 +++ b/xbmc/addons/AddonDatabase.cpp
-@@ -193,6 +193,11 @@ void CAddonDatabase::UpdateTables(int version)
+@@ -189,6 +189,11 @@ void CAddonDatabase::UpdateTables(int version)
      m_pDS->exec("DELETE FROM dependencies");
      m_pDS->exec("DELETE FROM addonlinkrepo");
      m_pDS->exec("DELETE FROM repo");
@@ -2455,8 +2456,8 @@ index 39d48f73e7..6c528a2420 100644
    }
    if (version < 25)
    {
-@@ -285,6 +290,17 @@ void CAddonDatabase::SyncInstalled(const std::set<std::string>& ids,
-           ORIGIN_SYSTEM, id.c_str()));
+@@ -301,6 +306,17 @@ void CAddonDatabase::SyncInstalled(const std::set<std::string>& ids,
+                              ORIGIN_SYSTEM, id.c_str()));
      }
  
 +    // Ugly hack to always enable inputstream.*, os.* and resource.language.*
@@ -2474,10 +2475,10 @@ index 39d48f73e7..6c528a2420 100644
    }
    catch (...)
 diff --git a/xbmc/addons/AddonManager.cpp b/xbmc/addons/AddonManager.cpp
-index fdb702dcdb..4aef486cd5 100644
+index f9a133474c..f4f7906765 100644
 --- a/xbmc/addons/AddonManager.cpp
 +++ b/xbmc/addons/AddonManager.cpp
-@@ -736,6 +736,7 @@ bool CAddonMgr::DisableAddon(const std::string& id, AddonDisabledReason disabled
+@@ -735,6 +735,7 @@ bool CAddonMgr::DisableAddon(const std::string& id, AddonDisabledReason disabled
    AddonPtr addon;
    if (GetAddon(id, addon, ADDON_UNKNOWN, false) && addon != NULL)
    {
@@ -2485,7 +2486,7 @@ index fdb702dcdb..4aef486cd5 100644
      CServiceBroker::GetEventLog().Add(EventPtr(new CAddonManagementEvent(addon, 24141)));
    }
  
-@@ -764,6 +765,7 @@ bool CAddonMgr::EnableSingle(const std::string& id)
+@@ -763,6 +764,7 @@ bool CAddonMgr::EnableSingle(const std::string& id)
    if (!m_database.EnableAddon(id))
      return false;
    m_disabled.erase(id);
@@ -2494,10 +2495,10 @@ index fdb702dcdb..4aef486cd5 100644
    CServiceBroker::GetEventLog().Add(EventPtr(new CAddonManagementEvent(addon, 24064)));
  
 diff --git a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
-index c40fe4d9a8..6ae03b8e93 100644
+index a4b62e02fe..89130af879 100644
 --- a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
 +++ b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
-@@ -2445,6 +2445,7 @@ CSampleBuffer* CActiveAE::SyncStream(CActiveAEStream *stream)
+@@ -2449,6 +2449,7 @@ CSampleBuffer* CActiveAE::SyncStream(CActiveAEStream *stream)
              memset(ret->pkt->data[i], 0, ret->pkt->linesize);
            }
          }
@@ -2505,7 +2506,7 @@ index c40fe4d9a8..6ae03b8e93 100644
  
          if ((ret->pkt->nb_samples == 0) && (ret->pkt->pause_burst_ms == 0))
          {
-@@ -2487,6 +2488,7 @@ CSampleBuffer* CActiveAE::SyncStream(CActiveAEStream *stream)
+@@ -2491,6 +2492,7 @@ CSampleBuffer* CActiveAE::SyncStream(CActiveAEStream *stream)
          stream->m_syncError.Correction((double)framesToSkip * 1000 / buf->pkt->config.sample_rate);
          error += (double)framesToSkip * 1000 / buf->pkt->config.sample_rate;
        }
@@ -6718,7 +6719,7 @@ index 99d1de5b90..24e1dc05d4 100644
  
  bool CProcessInfo::GetVideoInterlaced()
 diff --git a/xbmc/cores/VideoPlayer/VideoPlayer.cpp b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
-index c00d388abb..3e24c912fa 100644
+index 5abbdeb7a3..f9751a495e 100644
 --- a/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 @@ -64,6 +64,7 @@
@@ -7749,7 +7750,7 @@ index a5292d87d4..55cf684188 100644
                         CORE_PLATFORM_NAME_LC STREQUAL x11 OR
                         CORE_PLATFORM_NAME_LC STREQUAL wayland))
 diff --git a/xbmc/guilib/GUIWindowManager.cpp b/xbmc/guilib/GUIWindowManager.cpp
-index 350fbdd089..4aef80baa3 100644
+index 1dc297bda8..4689ba1ec0 100644
 --- a/xbmc/guilib/GUIWindowManager.cpp
 +++ b/xbmc/guilib/GUIWindowManager.cpp
 @@ -833,7 +833,16 @@ void CGUIWindowManager::ActivateWindow_Internal(int iWindowID, const std::vector
@@ -10212,7 +10213,7 @@ index 0000000000..b173a456bc
 +  static bool HasRW(const std::string &path);
 +};
 diff --git a/xbmc/utils/SystemInfo.cpp b/xbmc/utils/SystemInfo.cpp
-index bf1c227b3e..32e9b27d8c 100644
+index a29ece96ce..22be44d5a1 100644
 --- a/xbmc/utils/SystemInfo.cpp
 +++ b/xbmc/utils/SystemInfo.cpp
 @@ -54,6 +54,9 @@ using namespace winrt::Windows::System::Profile;
@@ -10225,7 +10226,7 @@ index bf1c227b3e..32e9b27d8c 100644
  #endif
  
  /* Platform identification */
-@@ -250,13 +253,12 @@ bool CSysInfoJob::DoWork()
+@@ -271,13 +274,12 @@ bool CSysInfoJob::DoWork()
  {
    m_info.systemUptime      = GetSystemUpTime(false);
    m_info.systemTotalUptime = GetSystemUpTime(true);
@@ -10241,7 +10242,7 @@ index bf1c227b3e..32e9b27d8c 100644
    return true;
  }
  
-@@ -288,11 +290,6 @@ std::string CSysInfoJob::GetVideoEncoder()
+@@ -309,11 +311,6 @@ std::string CSysInfoJob::GetVideoEncoder()
    return "GPU: " + CServiceBroker::GetRenderSystem()->GetRenderRenderer();
  }
  
@@ -10253,7 +10254,7 @@ index bf1c227b3e..32e9b27d8c 100644
  bool CSysInfoJob::SystemUpTime(int iInputMinutes, int &iMinutes, int &iHours, int &iDays)
  {
    iHours = 0; iDays = 0;
-@@ -369,8 +366,8 @@ std::string CSysInfo::TranslateInfo(int info) const
+@@ -390,8 +387,8 @@ std::string CSysInfo::TranslateInfo(int info) const
        return g_localizeStrings.Get(13296);
      else
        return g_localizeStrings.Get(13297);
@@ -10264,43 +10265,18 @@ index bf1c227b3e..32e9b27d8c 100644
    default:
      return "";
    }
-@@ -506,26 +503,18 @@ std::string CSysInfo::GetKernelVersionFull(void)
+@@ -527,6 +524,10 @@ std::string CSysInfo::GetKernelVersionFull(void)
    static std::string kernelVersionFull;
    if (!kernelVersionFull.empty())
      return kernelVersionFull;
 +  static std::string kernelVersionR;
 +  static std::string kernelVersionV;
 +  static std::string kernelVersionM;
++
  
--#if defined(TARGET_WINDOWS_DESKTOP)
--  OSVERSIONINFOEXW osvi;
--  if (sysGetVersionExWByRef(osvi))
--    kernelVersionFull = StringUtils::Format("%d.%d.%d", osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.dwBuildNumber);
--#elif  defined(TARGET_WINDOWS_STORE)
--  // get the system version number
--  auto sv = AnalyticsInfo::VersionInfo().DeviceFamilyVersion();
--  wchar_t* end;
--  unsigned long long  v = wcstoull(sv.c_str(), &end, 10);
--  unsigned long long v1 = (v & 0xFFFF000000000000L) >> 48;
--  unsigned long long v2 = (v & 0x0000FFFF00000000L) >> 32;
--  unsigned long long v3 = (v & 0x00000000FFFF0000L) >> 16;
--  kernelVersionFull = StringUtils::Format("%lld.%lld.%lld", v1, v2, v3);
--
--#elif defined(TARGET_POSIX)
-   struct utsname un;
-   if (uname(&un) == 0)
--    kernelVersionFull.assign(un.release);
--#endif // defined(TARGET_POSIX)
-+  {
-+    kernelVersionR.assign(un.release);
-+    kernelVersionV.assign(un.version);
-+    kernelVersionM.assign(un.machine);
-+  }
-+  kernelVersionFull = kernelVersionR + " " + kernelVersionM;
- 
-   if (kernelVersionFull.empty())
-     kernelVersionFull = "0.0.0"; // can't detect
-@@ -711,7 +700,7 @@ std::string CSysInfo::GetOsPrettyNameWithVersion(void)
+ #if defined(TARGET_WINDOWS_DESKTOP)
+   OSVERSIONINFOEXW osvi = {};
+@@ -736,7 +737,7 @@ std::string CSysInfo::GetOsPrettyNameWithVersion(void)
    }
  
    if (osNameVer.find(GetOsVersion()) == std::string::npos)
@@ -10309,7 +10285,7 @@ index bf1c227b3e..32e9b27d8c 100644
  #endif // defined(TARGET_LINUX)
  
    if (osNameVer.empty())
-@@ -973,9 +962,7 @@ int CSysInfo::GetXbmcBitness(void)
+@@ -1000,9 +1001,7 @@ int CSysInfo::GetXbmcBitness(void)
  
  bool CSysInfo::HasInternet()
  {
@@ -10321,10 +10297,10 @@ index bf1c227b3e..32e9b27d8c 100644
  
  std::string CSysInfo::GetHddSpaceInfo(int drive, bool shortText)
 diff --git a/xbmc/utils/SystemInfo.h b/xbmc/utils/SystemInfo.h
-index 30bd717234..72d517feb4 100644
+index 4b2aa6a314..6e15d2a963 100644
 --- a/xbmc/utils/SystemInfo.h
 +++ b/xbmc/utils/SystemInfo.h
-@@ -42,7 +42,7 @@ public:
+@@ -44,7 +44,7 @@ public:
    std::string cpuFrequency;
    std::string osVersionInfo;
    std::string macAddress;
@@ -10333,7 +10309,7 @@ index 30bd717234..72d517feb4 100644
  };
  
  class CSysInfoJob : public CJob
-@@ -59,7 +59,6 @@ private:
+@@ -61,7 +61,6 @@ private:
    static std::string GetSystemUpTime(bool bTotalUptime);
    static std::string GetMACAddress();
    static std::string GetVideoEncoder();
