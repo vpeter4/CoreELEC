@@ -1,0 +1,17 @@
+compile acs_tool from source
+
+copied from
+  https://github.com/chewitt/amlogic-boot-fip/commit/58fa75a640240198953b69a45b2d2d95c327924d#diff-e9a2a1bd9da5df404deae268d0f2cc63
+and compield with
+  Python 3.7.7 (default, Jun 24 2020, 09:53:19)
+
+--- a/Makefile	2020-09-25 14:42:24.395278900 +0200
++++ b/Makefile	2020-09-25 14:44:26.720785899 +0200
+@@ -939,6 +939,7 @@ boot.bin: fip.bin
+ ifeq ($(CONFIG_AML_UBOOT_AUTO_TEST), y)
+ 	$(Q)python $(FIP_FOLDER)/acs_tool.pyc $(FIP_FOLDER_SOC)/bl2_utst.bin $(FIP_FOLDER_SOC)/bl2_acs.bin $(FIP_FOLDER_SOC)/acs.bin 0
+ else
++	$(Q)python -c "import os; os.chdir('$(FIP_FOLDER)'); import py_compile; py_compile.compile('acs_tool.py', 'acs_tool.pyc')"
+ 	$(Q)python $(FIP_FOLDER)/acs_tool.pyc $(FIP_FOLDER_SOC)/bl2.bin $(FIP_FOLDER_SOC)/bl2_acs.bin $(FIP_FOLDER_SOC)/acs.bin 0
+ endif
+ 	$(Q)$(FIP_FOLDER)/blx_fix.sh \
