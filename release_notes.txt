@@ -1,6 +1,6 @@
-[B][COLOR red]CoreELEC 9.2.4.2[/COLOR][/B]
+[B][COLOR red]CoreELEC 9.2.5[/COLOR][/B]
 [B][COLOR darkred]—————————————————————————————————————————————————————————————————————————————————————[/COLOR][/B]
-CoreELEC 9.2.4.2 with better support for BD-J menus
+CoreELEC 9.2.5 with better support for BD-J menus
 
 + libbluray 1.2.0
 + libaacs 0.10.0
