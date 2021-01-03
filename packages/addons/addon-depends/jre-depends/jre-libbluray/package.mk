@@ -9,15 +9,22 @@ PKG_LONGDESC="libbluray jar for BD-J menus"
 PKG_URL=""
 PKG_DEPENDS_UNPACK+=" jdk-x86_64-zulu libbluray"
 PKG_PATCH_DIRS+=" $(get_pkg_directory libbluray)/patches"
-PKG_BUILD_FLAGS="-sysroot"
 
 unpack() {
   mkdir -p ${PKG_BUILD}
   tar --strip-components=1 -xf ${SOURCES}/${PKG_NAME:4}/${PKG_NAME:4}-${PKG_VERSION}.tar.bz2 -C ${PKG_BUILD}
 }
 
+post_unpack() {
+  if [ -d "$(get_pkg_directory libbluray)/sources" ]; then
+    cp -PRf "$(get_pkg_directory libbluray)/sources/"* $PKG_BUILD
+  fi
+}
+
 pre_configure_target() {
   export JAVA_HOME="$(get_build_dir jdk-x86_64-zulu)"
+
+  export CFLAGS="$CFLAGS -D_GNU_SOURCE"
 
   # build also jar
   PKG_CONFIGURE_OPTS_TARGET="${PKG_CONFIGURE_OPTS_TARGET/disable-bdjava-jar/enable-bdjava-jar}"
