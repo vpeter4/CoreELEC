@@ -14,3 +14,6 @@ CoreELEC 9.2.5 with better support for BD-J menus
     https://github.com/xbmc/xbmc/pull/17186
   fix some popup menu
     https://github.com/xbmc/xbmc/pull/17210
+
++ patch from fandangos <veggav@gmail.com>
+  Fix chapter skip and seek in blurays with popup menus
