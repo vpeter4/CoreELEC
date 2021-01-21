@@ -3,4 +3,7 @@
 CoreELEC 19 with better support for BD-J menus
 
 + libbluray 1.2.0
-+ libaacs 0.10.0
+
++ patch from fandangos <veggav@gmail.com>
+  Fix chapter skip and seek in blurays with popup menus
+
