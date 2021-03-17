@@ -36,9 +36,9 @@ index 04365fd..ff15527 100644
  	src/libbluray/disc/udf_fs.h \
  	src/libbluray/disc/udf_fs.c\
 @@ -177,6 +183,7 @@ libbluray_la_SOURCES += \
+ 	contrib/libudfread/src/ecma167.c \
  	contrib/libudfread/src/udfread.h \
  	contrib/libudfread/src/udfread.c
- endif
 +endif
  
  if HAVE_DARWIN
@@ -80,8 +80,148 @@ index 04365fd..ff15527 100644
  bin_PROGRAMS = \
  	bd_info
  
-
-
+diff --git a/configure.ac b/configure.ac
+index 5fd3c8d..15f53ca 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -81,6 +81,16 @@ AC_ARG_ENABLE([examples],
+   [use_examples=$enableval],
+   [use_examples=yes])
+ 
++AC_ARG_ENABLE([bdjava],
++  [AS_HELP_STRING([--disable-bdjava], [disable BD-Java support @<:@default=enabled@:>@])],
++  [use_bdjava=$enableval],
++  [use_bdjava=yes])
++
++AC_ARG_ENABLE([udf],
++  [AS_HELP_STRING([--disable-udf], [disable UDF support @<:@default=enabled@:>@])],
++  [enable_udf=$enableval],
++  [enable_udf=yes])
++
+ AC_ARG_ENABLE([bdjava-jar],
+   [AS_HELP_STRING([--disable-bdjava-jar],
+   [disable building of BD-Java JAR file @<:@default=enabled@:>@])],
+@@ -196,23 +206,24 @@ dnl use examples
+ AM_CONDITIONAL([USING_EXAMPLES], [ test $use_examples = "yes" ])
+ 
+ dnl use bdjava
+-case $host_cpu in
+-     x86_64) java_arch=amd64 ;;
+-     i?86)   java_arch=i386 ;;
+-     arm*)   java_arch=arm ;;
+-     *)      java_arch=$host_cpu ;;
+-esac
+-case $host_os in
+-     linux*)   java_os=linux ;;
+-     win*)     java_os=win32 ;;
+-     mingw*)   java_os=win32 ;;
+-     freebsd*) java_os=freebsd ;;
+-     solaris*) java_os=solaris ;;
+-     darwin*)  java_os=darwin ;;
+-     *)        java_os=$host_os ;;
+-esac
+-
+-AS_IF([test "x${JDK_HOME}" != "x"], [
++if [[ $use_bdjava = "yes" ]]; then
++  case $host_cpu in
++       x86_64) java_arch=amd64 ;;
++       i?86)   java_arch=i386 ;;
++       arm*)   java_arch=arm ;;
++       *)      java_arch=$host_cpu ;;
++  esac
++  case $host_os in
++       linux*)   java_os=linux ;;
++       win*)     java_os=win32 ;;
++       mingw*)   java_os=win32 ;;
++       freebsd*) java_os=freebsd ;;
++       solaris*) java_os=solaris ;;
++       darwin*)  java_os=darwin ;;
++       *)        java_os=$host_os ;;
++  esac
++
++  AS_IF([test "x${JDK_HOME}" != "x"], [
+     BDJAVA_CFLAGS="-I${JDK_HOME}/include -I${JDK_HOME}/include/$java_os"
+ 
+     temp_CPPFLAGS="$CPPFLAGS"
+@@ -223,13 +234,16 @@ AS_IF([test "x${JDK_HOME}" != "x"], [
+     BDJAVA_CFLAGS='-I${abs_top_srcdir}/jni -I${abs_top_srcdir}/jni/'"${java_os}"
+ ])
+ 
+-AC_CHECK_PROG(HAVE_ANT, [ant], yes, no)
+-if test "x$use_bdjava_jar" = "xyes" && test "x$HAVE_ANT" = "xno"; then
+-    AC_MSG_ERROR([BD-J requires ANT, but ant was not found. Please install it.])
+-fi
++  AC_CHECK_PROG(HAVE_ANT, [ant], yes, no)
++  if test "x$use_bdjava_jar" = "xyes" && test "x$HAVE_ANT" = "xno"; then
++      AC_MSG_ERROR([BD-J requires ANT, but ant was not found. Please install it.])
++  fi
+ 
+-AC_DEFINE_UNQUOTED([JAVA_ARCH], ["$java_arch"], ["Defines the architecture of the java vm."])
+-AC_DEFINE_UNQUOTED([JDK_HOME], ["$JDK_HOME"], [""])
++  AC_DEFINE([USING_BDJAVA], [1], ["Define to 1 if using BD-Java"])
++  AC_DEFINE_UNQUOTED([JAVA_ARCH], ["$java_arch"], ["Defines the architecture of the java vm."])
++  AC_DEFINE_UNQUOTED([JDK_HOME], ["$JDK_HOME"], [""])
++fi
++AM_CONDITIONAL([USING_BDJAVA], [ test $use_bdjava = "yes" ])
+ AM_CONDITIONAL([USING_BDJAVA_BUILD_JAR], [ test $use_bdjava_jar = "yes" ])
+ 
+ dnl BD-J type
+@@ -243,13 +257,22 @@ dnl bootclasspath
+ AC_SUBST(BDJ_BOOTCLASSPATH)
+ 
+ dnl udf support (using git submodule)
+-if test ! -f "${srcdir}/contrib/libudfread/src/udfread.h"; then
+-    AC_MSG_ERROR("libudfread source tree not found")
+-fi
+-AC_CHECK_HEADERS([unistd.h fcntl.h])
+-AS_IF([test "${SYS}" != "mingw32"], [
+-    AC_CHECK_FUNC([pread],, [AC_DEFINE([NEED_PREAD_IMPL], [1], [Define to 1 to use inefficient pread() replacement])])
+-])
++AS_IF([test "x$enable_udf" = "xyes"], [
++    if test ! -f "${srcdir}/contrib/libudfread/src/udfread.h"; then
++        AC_MSG_ERROR("libudfread source tree not found")
++    fi
++    AC_CHECK_HEADERS([unistd.h fcntl.h])
++    AS_IF([test "${SYS}" != "mingw32"], [
++      AC_CHECK_FUNC([pread],, [AC_MSG_ERROR("Function pread not found. Try with --disable-udf.")])
++    ])
++
++    AC_DEFINE([ENABLE_UDF], [1], [Define to 1 if libudfread is to be used for disc image access])
++    UDF_CFLAGS='-I${srcdir}/contrib/libudfread/src/'
++    AC_SUBST(UDF_CFLAGS)
++    ],
++  [enable_udf=no])
++
++AM_CONDITIONAL([ENABLE_UDF], [test $enable_udf = "yes" ])
+ 
+ dnl generate documentation
+ DX_INIT_DOXYGEN(libbluray, doc/doxygen-config, [doc/doxygen])
+@@ -279,19 +302,25 @@ dnl ---------------------------------------------
+ 
+ echo "  Summary:"
+ echo "  --------"
++echo "  BD-J support:                  $use_bdjava"
++if [[ $use_bdjava = "yes" ]]; then
+ echo "  BD-J type:                     $BDJ_TYPE"
+ echo "  build JAR:                     $use_bdjava_jar"
+ if test x"$BDJ_BOOTCLASSPATH" != x""; then
+ echo "  BD-J bootclasspath:            $BDJ_BOOTCLASSPATH"
+ fi
++fi
+ echo "  Font support (freetype2):      $with_freetype"
+ if [[ $with_freetype = "yes" ]]; then
++if [[ $use_bdjava = "yes" ]]; then
+ if test "${SYS}" != "mingw32"; then
+ echo "  Use system fonts (fontconfig): $with_fontconfig"
+ else
+ echo "  Use system fonts:              yes"
+ fi
+ fi
++fi
+ echo "  Metadata support (libxml2):    $with_libxml2"
++echo "  UDF filesystem support:        $enable_udf"
+ echo "  Build examples:                $use_examples"
+ 
 diff --git a/includes/inttypes.h b/includes/inttypes.h
 new file mode 100644
 index 0000000..ead903f
@@ -1195,28 +1335,49 @@ index 11aaf82..f551863 100644
      file = calloc(1, sizeof(BD_FILE_H));
      if (!file) {
          BD_DEBUG(DBG_FILE | DBG_CRIT, "Error opening file %s (out of memory)\n", filename);
-#
-# FIX IT
-#
-#		diff --git a/src/libbluray/bdnav/index_parse.c b/src/libbluray/bdnav/index_parse.c
-#		index 0deb617..300a1bf 100644
-#		--- a/src/libbluray/bdnav/index_parse.c
-#		+++ b/src/libbluray/bdnav/index_parse.c
-#		@@ -105,12 +105,11 @@ static int _parse_index(BITSTREAM *bs, INDX_ROOT *index)
-#		 
-#		     index->num_titles = bs_read(bs, 16);
-#		     if (!index->num_titles) {
-#		-        BD_DEBUG(DBG_CRIT, "empty index\n");
-#		-        return 0;
-#		+        BD_DEBUG(DBG_NAV, "empty index\n");
-#		     }
-#		 
-#		     index->titles = calloc(index->num_titles, sizeof(INDX_TITLE));
-#		-    if (!index->titles) {
-#		+    if (index->num_titles && !index->titles) {
-#		         BD_DEBUG(DBG_CRIT, "out of memory\n");
-#		         return 0;
-#		     }
+diff --git a/src/libbluray/bdnav/bdmv_parse.c b/src/libbluray/bdnav/bdmv_parse.c
+index e298ca3..2c310aa 100644
+--- a/src/libbluray/bdnav/bdmv_parse.c
++++ b/src/libbluray/bdnav/bdmv_parse.c
+@@ -59,6 +59,7 @@ int bdmv_parse_header(BITSTREAM *bs, uint32_t type, uint32_t *version)
+     switch (ver) {
+         case BDMV_VERSION_0100:
+         case BDMV_VERSION_0200:
++        case BDMV_VERSION_0240:
+         case BDMV_VERSION_0300:
+             break;
+         default:
+diff --git a/src/libbluray/bdnav/bdmv_parse.h b/src/libbluray/bdnav/bdmv_parse.h
+index 8f953a3..9dbbed5 100644
+--- a/src/libbluray/bdnav/bdmv_parse.h
++++ b/src/libbluray/bdnav/bdmv_parse.h
+@@ -27,6 +27,7 @@
+ 
+ #define BDMV_VERSION_0100 ('0' << 24 | '1' << 16 | '0' << 8 | '0')
+ #define BDMV_VERSION_0200 ('0' << 24 | '2' << 16 | '0' << 8 | '0')
++#define BDMV_VERSION_0240 ('0' << 24 | '2' << 16 | '4' << 8 | '0')
+ #define BDMV_VERSION_0300 ('0' << 24 | '3' << 16 | '0' << 8 | '0')
+ 
+ BD_PRIVATE int bdmv_parse_header(BITSTREAM *bs, uint32_t type, uint32_t *version);
+diff --git a/src/libbluray/bdnav/index_parse.c b/src/libbluray/bdnav/index_parse.c
+index 0deb617..300a1bf 100644
+--- a/src/libbluray/bdnav/index_parse.c
++++ b/src/libbluray/bdnav/index_parse.c
+@@ -105,12 +105,11 @@ static int _parse_index(BITSTREAM *bs, INDX_ROOT *index)
+ 
+     index->num_titles = bs_read(bs, 16);
+     if (!index->num_titles) {
+-        BD_DEBUG(DBG_CRIT, "empty index\n");
+-        return 0;
++        BD_DEBUG(DBG_NAV, "empty index\n");
+     }
+ 
+     index->titles = calloc(index->num_titles, sizeof(INDX_TITLE));
+-    if (!index->titles) {
++    if (index->num_titles && !index->titles) {
+         BD_DEBUG(DBG_CRIT, "out of memory\n");
+         return 0;
+     }
 diff --git a/src/libbluray/bdnav/mpls_data.h b/src/libbluray/bdnav/mpls_data.h
 index 2ceac92..d23d40e 100644
 --- a/src/libbluray/bdnav/mpls_data.h
@@ -1229,10 +1390,30 @@ index 2ceac92..d23d40e 100644
  } MPLS_STREAM;
  
  typedef struct
+@@ -107,6 +108,7 @@ typedef struct
+     uint8_t         random_access_flag;
+     uint8_t         audio_mix_flag;
+     uint8_t         lossless_bypass_flag;
++    uint8_t         mvc_base_view_r_flag;
+ } MPLS_AI;
+ 
+ typedef struct
 diff --git a/src/libbluray/bdnav/mpls_parse.c b/src/libbluray/bdnav/mpls_parse.c
 index 358b634..569c015 100644
 --- a/src/libbluray/bdnav/mpls_parse.c
 +++ b/src/libbluray/bdnav/mpls_parse.c
+@@ -77,9 +77,10 @@ _parse_appinfo(BITSTREAM *bits, MPLS_AI *ai)
+     ai->random_access_flag = bs_read(bits, 1);
+     ai->audio_mix_flag = bs_read(bits, 1);
+     ai->lossless_bypass_flag = bs_read(bits, 1);
++    ai->mvc_base_view_r_flag = bs_read(bits, 1);
+ #if 0
+     // Reserved
+-    bs_skip(bits, 13);
++    bs_skip(bits, 12);
+     bs_seek_byte(bits, pos + len);
+ #endif
+     return 1;
 @@ -194,6 +195,7 @@ _parse_stream(BITSTREAM *bits, MPLS_STREAM *s)
              break;
      };
@@ -1365,6 +1546,18 @@ index 883b35c..8220787 100644
  
  #include <stdio.h> // SEEK_
  #include <stdlib.h>
+@@ -150,9 +152,11 @@ struct bluray {
+     uint8_t         hdmv_suspended;
+ 
+     /* BD-J */
++#ifdef USING_BDJAVA
+     BDJAVA         *bdjava;
+     BDJ_STORAGE     bdjstorage;
+     uint8_t         bdj_wait_start;  /* BD-J has selected playlist (prefetch) but not yet started playback */
++#endif
+ 
+     /* HDMV graphics */
+     GRAPHICS_CONTROLLER *graphics_controller;
 @@ -166,10 +170,12 @@ struct bluray {
      uint64_t gc_wakeup_pos;   /* stream position of gc_wakeup_time */
  
@@ -1503,9 +1696,9 @@ index 883b35c..8220787 100644
 -}
 -
 +#ifdef USING_BDJAVA
- static int _bd_set_virtual_package(BLURAY *bd, const char *vp_path, int psr_init_backup)
+ int bd_set_virtual_package(BLURAY *bd, const char *vp_path, int psr_init_backup)
  {
-     if (bd->title) {
+     bd_mutex_lock(&bd->mutex);
 @@ -1216,12 +1203,16 @@ int bd_set_virtual_package(BLURAY *bd, const char *vp_path, int psr_init_backup)
  
      return 0;
@@ -1558,7 +1751,7 @@ index 883b35c..8220787 100644
 +#ifdef USING_BDJAVA
      if (bd->bdjava == NULL) {
          const char *root = disc_root(bd->disc);
-         bd->bdjava = bdj_open(root, bd, bd->disc_info.bdj_disc_id, &bd->bdj_config);
+         bd->bdjava = bdj_open(root, bd, bd->disc_info.bdj_disc_id, &bd->bdjstorage);
 @@ -1349,8 +1342,14 @@ static int _start_bdj(BLURAY *bd, unsigned title)
      }
  
@@ -1598,7 +1791,7 @@ index 883b35c..8220787 100644
  static void _close_bdj(BLURAY *bd)
  {
      if (bd->bdjava != NULL) {
-@@ -1375,6 +1382,10 @@ static void _close_bdj(BLURAY *bd)
+@@ -1375,6 +1382,20 @@ static void _close_bdj(BLURAY *bd)
          bd->bdjava = NULL;
      }
  }
@@ -1606,6 +1799,16 @@ index 883b35c..8220787 100644
 +#define _close_bdj(bd) do{}while(0)
 +#endif
 +
++#ifdef USING_BDJAVA
++static void _storage_free(BLURAY *bd)
++{
++    X_FREE(bd->bdjstorage.cache_root);
++    X_FREE(bd->bdjstorage.persistent_root);
++    X_FREE(bd->bdjstorage.classpath);
++}
++#else
++#define _storage_free(bd) do{}while(0)
++#endif
  
  /*
   * open / close
@@ -1619,7 +1822,7 @@ index 883b35c..8220787 100644
      env = getenv("LIBBLURAY_PERSISTENT_STORAGE");
 @@ -1408,6 +1430,7 @@ BLURAY *bd_init(void)
          int v = (!strcmp(env, "yes")) ? 1 : (!strcmp(env, "no")) ? 0 : atoi(env);
-         bd->bdj_config.no_persistent_storage = !v;
+         bd->bdjstorage.no_persistent_storage = !v;
      }
 +#endif
  
@@ -1755,7 +1958,7 @@ index 883b35c..8220787 100644
          if (bd->title_type != title_undef) {
              BD_DEBUG(DBG_BLURAY | DBG_CRIT, "Can't disable persistent storage during playback\n");
 @@ -2811,6 +2893,7 @@ int bd_set_player_setting(BLURAY *bd, uint32_t idx, uint32_t value)
-         bd->bdj_config.no_persistent_storage = !value;
+         bd->bdjstorage.no_persistent_storage = !value;
          return 1;
      }
 +#endif
@@ -1769,10 +1972,10 @@ index 883b35c..8220787 100644
 +#ifdef USING_BDJAVA
          case BLURAY_PLAYER_CACHE_ROOT:
              bd_mutex_lock(&bd->mutex);
-             X_FREE(bd->bdj_config.cache_root);
+             X_FREE(bd->bdjstorage.cache_root);
 @@ -2850,6 +2934,7 @@ int bd_set_player_setting_str(BLURAY *bd, uint32_t idx, const char *s)
              bd_mutex_unlock(&bd->mutex);
-             BD_DEBUG(DBG_BDJ, "Persistent root dir set to %s\n", bd->bdj_config.persistent_root);
+             BD_DEBUG(DBG_BDJ, "Persistent root dir set to %s\n", bd->bdjstorage.persistent_root);
              return 1;
 +#endif /* USING_BDJAVA */
  
@@ -1830,6 +2033,17 @@ index 883b35c..8220787 100644
 +#ifdef USING_BDJAVA
      } else if (bd->title_type == title_bdj) {
          result = _bdj_event(bd, BDJ_EVENT_MOUSE, param);
++#endif
+     }
+ 
+     bd_mutex_unlock(&bd->mutex);
+@@ -3636,8 +3728,10 @@ int bd_user_input(BLURAY *bd, int64_t pts, uint32_t key)
+ 
+     if (bd->title_type == title_hdmv) {
+         result = _run_gc(bd, GC_CTRL_VK_KEY, key);
++#ifdef USING_BDJAVA
+     } else if (bd->title_type == title_bdj) {
+         result = _bdj_event(bd, BDJ_EVENT_VK_KEY, key);
 +#endif
      }
  
@@ -1929,6 +2143,15 @@ index 70e6a84..0cd6047 100644
      uint32_t           pkt_count;
      uint8_t            still_mode;
      uint16_t           still_time;  /* seconds */
+@@ -274,6 +276,8 @@ typedef struct bd_title_info {
+     BLURAY_CLIP_INFO     *clips;
+     BLURAY_TITLE_CHAPTER *chapters;
+     BLURAY_TITLE_MARK    *marks;
++
++    uint8_t              mvc_base_view_r_flag;
+ } BLURAY_TITLE_INFO;
+ 
+ /*
 @@ -480,6 +484,16 @@ int bd_select_playlist(BLURAY *bd, uint32_t playlist);
   */
  uint32_t bd_get_current_title(BLURAY *bd);

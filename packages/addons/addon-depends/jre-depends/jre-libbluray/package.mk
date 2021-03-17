@@ -16,7 +16,19 @@ unpack() {
   tar --strip-components=1 -xf ${SOURCES}/${PKG_NAME:4}/${PKG_NAME:4}-${PKG_VERSION}.tar.bz2 -C ${PKG_BUILD}
 }
 
+post_unpack() {
+  if [ -d "$(get_pkg_directory libbluray)/sources" ]; then
+    cp -PRf "$(get_pkg_directory libbluray)/sources/"* $PKG_BUILD
+  fi
+}
+
 pre_configure_target() {
+  export CFLAGS="$CFLAGS -D_GNU_SOURCE"
+
+  # use external libudfread
+  PKG_CONFIGURE_OPTS_TARGET+=" LIBUDFREAD_CFLAGS=$SYSROOT/usr/include" 
+  PKG_CONFIGURE_OPTS_TARGET+=" LIBUDFREAD_LIBS=$SYSROOT/usr/lib"
+
   export JAVA_HOME="$(get_build_dir jdk-x86_64-zulu)"
 
   # build also jar
