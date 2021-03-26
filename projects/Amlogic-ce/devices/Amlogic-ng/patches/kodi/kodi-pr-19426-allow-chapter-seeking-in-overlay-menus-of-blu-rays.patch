@@ -1,0 +1,216 @@
+From c3d48d3e96e684cc3b152f4e5834e01ee79f25d2 Mon Sep 17 00:00:00 2001
+From: da-anda <da-anda@xbmc.org>
+Date: Mon, 25 Jan 2021 20:27:15 +0100
+Subject: [PATCH] [VideoPlayer] allow chapter seeking in overlay menus of
+ blu-rays
+
+---
+ .../DVDInputStreams/DVDInputStream.h          |  1 +
+ .../DVDInputStreams/DVDInputStreamBluray.cpp  | 30 ++++++++++++++-----
+ .../DVDInputStreams/DVDInputStreamBluray.h    |  3 ++
+ xbmc/cores/VideoPlayer/VideoPlayer.cpp        | 25 +++++++++++-----
+ 4 files changed, 44 insertions(+), 15 deletions(-)
+
+diff --git a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStream.h b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStream.h
+index 270c9bdff39c..388425d30132 100644
+--- a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStream.h
++++ b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStream.h
+@@ -114,6 +114,7 @@ class CDVDInputStream
+     virtual double GetTimeStampCorrection() { return 0.0; };
+     virtual bool GetState(std::string &xmlstate) = 0;
+     virtual bool SetState(const std::string &xmlstate) = 0;
++    virtual bool CanBeSeeked() { return !IsInMenu(); };
+   };
+ 
+   class IDemux
+diff --git a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.cpp b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.cpp
+index 00d52add9f55..0bb1c064b934 100644
+--- a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.cpp
++++ b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.cpp
+@@ -486,11 +486,12 @@ void CDVDInputStreamBluray::ProcessEvent() {
+     CLog::Log(LOGDEBUG, "CDVDInputStreamBluray - BD_EVENT_TITLE %d", m_event.param);
+     const BLURAY_DISC_INFO* disc_info = bd_get_disc_info(m_bd);
+ 
++    m_menu = m_isInMainMenu = false;
++
+     if (m_event.param == BLURAY_TITLE_TOP_MENU)
+     {
+       m_title = disc_info->top_menu;
+-      m_menu = true;
+-      break;
++      m_menu = m_isInMainMenu = true;
+     }
+     else if (m_event.param == BLURAY_TITLE_FIRST_PLAY)
+       m_title = disc_info->first_play;
+@@ -498,7 +499,6 @@ void CDVDInputStreamBluray::ProcessEvent() {
+       m_title = disc_info->titles[m_event.param];
+     else
+       m_title = nullptr;
+-    m_menu = false;
+ 
+     break;
+   }
+@@ -548,6 +548,8 @@ void CDVDInputStreamBluray::ProcessEvent() {
+     CLog::Log(LOGDEBUG, "CDVDInputStreamBluray - BD_EVENT_MENU %d",
+         m_event.param);
+     m_menu = (m_event.param != 0);
++    if (m_menu == false)
++      m_isInMainMenu = false;
+     break;
+ 
+   case BD_EVENT_IDLE:
+@@ -688,6 +690,7 @@ void CDVDInputStreamBluray::OverlayClose()
+   group->bForced = true;
+   m_player->OnDiscNavResult(static_cast<void*>(group), BD_EVENT_MENU_OVERLAY);
+   group->Release();
++  m_hasOverlay = false;
+ #endif
+ }
+ 
+@@ -759,6 +762,7 @@ void CDVDInputStreamBluray::OverlayFlush(int64_t pts)
+ 
+   m_player->OnDiscNavResult(static_cast<void*>(group), BD_EVENT_MENU_OVERLAY);
+   group->Release();
++  m_hasOverlay = true;
+ #endif
+ }
+ 
+@@ -1111,14 +1115,15 @@ void CDVDInputStreamBluray::OnMenu()
+     return;
+   }
+ 
++  // we can not use this event to track a possible popup menu state since bd-j blu-rays can
++  // toggle the popup menu on their own without firing this event, and if they do this, our
++  // internal tracking state would be wrong. So just process and return.
+   if(bd_user_input(m_bd, -1, BD_VK_POPUP) >= 0)
+-  {
+-    m_menu = !m_menu;
+     return;
+-  }
++
+   CLog::Log(LOGDEBUG, "CDVDInputStreamBluray::OnMenu - popup failed, trying root");
+ 
+-  if(bd_user_input(m_bd, -1, BD_VK_ROOT_MENU) >= 0)
++  if (bd_user_input(m_bd, -1, BD_VK_ROOT_MENU) >= 0)
+     return;
+ 
+   CLog::Log(LOGDEBUG, "CDVDInputStreamBluray::OnMenu - root failed, trying explicit");
+@@ -1130,7 +1135,11 @@ bool CDVDInputStreamBluray::IsInMenu()
+ {
+   if(m_bd == nullptr || !m_navmode)
+     return false;
+-  if(m_menu /*|| !m_planes[BD_OVERLAY_IG].o.empty()*/)
++  
++  // since there is no way to tell in a BD-J blu-ray when a popup menu actually is visible,
++  // we have to assume that the blu-ray is in menu/navigation mode when there is an overlay
++  // on screen, even if it might be invisible (which is impossible to detect)
++  if(m_menu || m_hasOverlay /*|| !m_planes[BD_OVERLAY_IG].o.empty()*/)
+     return true;
+   return false;
+ }
+@@ -1151,6 +1160,11 @@ void CDVDInputStreamBluray::SkipStill()
+   }
+ }
+ 
++bool CDVDInputStreamBluray::CanBeSeeked()
++{
++  return !IsInMenu() || !m_isInMainMenu;
++}
++
+ bool CDVDInputStreamBluray::HasMenu()
+ {
+   return m_navmode;
+diff --git a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.h b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.h
+index f5c45bbb1ef9..d7e378d92525 100644
+--- a/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.h
++++ b/xbmc/cores/VideoPlayer/DVDInputStreams/DVDInputStreamBluray.h
+@@ -91,6 +91,7 @@ class CDVDInputStreamBluray
+   void SkipStill() override;
+   bool GetState(std::string &xmlstate) override { return false; }
+   bool SetState(const std::string &xmlstate) override { return false; }
++  bool CanBeSeeked() override;
+ 
+ 
+   void UserInput(bd_vk_key_e vk);
+@@ -138,6 +139,8 @@ class CDVDInputStreamBluray
+   BLURAY_CLIP_INFO* m_clip = nullptr;
+   uint32_t m_angle = 0;
+   bool m_menu = false;
++  bool m_isInMainMenu = false;
++  bool m_hasOverlay = false;
+   bool m_navmode = false;
+   int m_dispTimeBeforeRead = 0;
+ 
+diff --git a/xbmc/cores/VideoPlayer/VideoPlayer.cpp b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
+index c23b2a24e653..d280261d798a 100644
+--- a/xbmc/cores/VideoPlayer/VideoPlayer.cpp
++++ b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
+@@ -4198,13 +4198,21 @@ bool CVideoPlayer::OnAction(const CAction &action)
+       case ACTION_NEXT_ITEM:
+         THREAD_ACTION(action);
+         CLog::Log(LOGDEBUG, " - pushed next in menu, stream will decide");
+-        pMenus->OnNext();
++        if (pMenus->CanBeSeeked() && GetChapterCount() > 0 && GetChapter() < GetChapterCount())
++            m_messenger.Put(new CDVDMsgPlayerSeekChapter(GetChapter() + 1));
++        else
++          pMenus->OnNext();
++
+         CServiceBroker::GetGUI()->GetInfoManager().GetInfoProviders().GetPlayerInfoProvider().SetDisplayAfterSeek();
+         return true;
+       case ACTION_PREV_ITEM:
+         THREAD_ACTION(action);
+         CLog::Log(LOGDEBUG, " - pushed prev in menu, stream will decide");
+-        pMenus->OnPrevious();
++        if (pMenus->CanBeSeeked() && GetChapterCount() > 0 && GetChapter() > 0)
++            m_messenger.Put(new CDVDMsgPlayerSeekChapter(GetChapter() - 1));
++        else
++          pMenus->OnPrevious();
++
+         CServiceBroker::GetGUI()->GetInfoManager().GetInfoProviders().GetPlayerInfoProvider().SetDisplayAfterSeek();
+         return true;
+       case ACTION_PREVIOUS_MENU:
+@@ -4554,9 +4562,11 @@ void CVideoPlayer::UpdatePlayState(double timeout)
+   state.startTime = 0;
+   state.timeMin = 0;
+ 
++  std::shared_ptr<CDVDInputStream::IMenus> pMenu = std::dynamic_pointer_cast<CDVDInputStream::IMenus>(m_pInputStream);
++
+   if (m_pDemuxer)
+   {
+-    if (IsInMenuInternal())
++    if (IsInMenuInternal() && pMenu && !pMenu->CanBeSeeked())
+       state.chapter = 0;
+     else
+       state.chapter = m_pDemuxer->GetChapter();
+@@ -4588,7 +4598,7 @@ void CVideoPlayer::UpdatePlayState(double timeout)
+     CDVDInputStream::IChapter* pChapter = m_pInputStream->GetIChapter();
+     if (pChapter)
+     {
+-      if (IsInMenuInternal())
++      if (IsInMenuInternal() && pMenu && !pMenu->CanBeSeeked())
+         state.chapter = 0;
+       else
+         state.chapter = pChapter->GetChapter();
+@@ -4638,9 +4648,9 @@ void CVideoPlayer::UpdatePlayState(double timeout)
+       state.time_offset = 0;
+     }
+ 
+-    if (std::shared_ptr<CDVDInputStream::IMenus> ptr = std::dynamic_pointer_cast<CDVDInputStream::IMenus>(m_pInputStream))
++    if (pMenu)
+     {
+-      if (!ptr->GetState(state.player_state))
++      if (!pMenu->GetState(state.player_state))
+         state.player_state = "";
+ 
+       if (m_dvd.state == DVDSTATE_STILL)
+@@ -4652,8 +4662,9 @@ void CVideoPlayer::UpdatePlayState(double timeout)
+       else if (IsInMenuInternal())
+       {
+         state.time = pDisplayTime->GetTime();
+-        state.time_offset = 0;
+         state.isInMenu = true;
++        if (!pMenu->CanBeSeeked())
++          state.time_offset = 0;
+       }
+       state.hasMenu = true;
+     }
