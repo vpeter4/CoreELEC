@@ -26,18 +26,26 @@ addon() {
   mkdir -p ${ADDON_BUILD}/${PKG_ADDON_ID}/lib
 
   cp -a $(get_build_dir jdk-${TARGET_ARCH}-zulu)/jre \
-        $(get_install_dir jre-libbluray)/usr/share/java/*.jar \
+        $(get_build_dir jre-libbluray)/.$TARGET_NAME/.libs/*.jar \
         ${PKG_DIR}/profile.d \
     ${ADDON_BUILD}/${PKG_ADDON_ID}
 
   # copy required libraries for JRE
-  _pkg_copy_lib libXtst $(get_install_dir chrome-libXtst)
-  _pkg_copy_lib libXi $(get_install_dir chrome-libXi)
-  _pkg_copy_lib libXrender $(get_install_dir chrome-libXrender)
+  _pkg_copy_lib libXtst     $(get_install_dir chrome-libXtst)
+  _pkg_copy_lib libXi       $(get_install_dir chrome-libXi)
+  _pkg_copy_lib libXrender  $(get_install_dir chrome-libXrender)
   _pkg_copy_lib libXinerama $(get_install_dir jre-libXinerama)
 
   if [ "${TARGET_ARCH}" = "arm" ]; then
-    _pkg_copy_lib libX11 $(get_install_dir libX11)
+    _pkg_copy_lib libX11  $(get_install_dir libX11)
     _pkg_copy_lib libXext $(get_install_dir libXext)
   fi
+}
+
+makeinstall_target() {
+(
+  # create addon in image
+  ADDON_BUILD="$PKG_INSTALL/usr/share/kodi/addons"
+  addon
+)
 }
