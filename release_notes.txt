@@ -1,7 +1,8 @@
-[B][COLOR red]CoreELEC 9.2.6[/COLOR][/B]
+[B][COLOR red]CoreELEC 9.2.7[/COLOR][/B]
 [B][COLOR darkred]—————————————————————————————————————————————————————————————————————————————————————[/COLOR][/B]
-CoreELEC 9.2.6 with better support for BD-J menus
+CoreELEC 9.2.7 with better support for BD-J menus
 
++ include jre.zulu addon in image itself
 + libbluray 1.2.0
 + libaacs 0.10.0
 + libcdio 2.1.0

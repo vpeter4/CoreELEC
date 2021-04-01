@@ -40,3 +40,11 @@ addon() {
     _pkg_copy_lib libXext $(get_build_dir libXext)/.$TARGET_NAME/src/.libs
   fi
 }
+
+makeinstall_target() {
+(
+  # create addon in image
+  ADDON_BUILD="$INSTALL/usr/share/kodi/addons"
+  addon
+)
+}
