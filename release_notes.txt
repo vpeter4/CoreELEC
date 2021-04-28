@@ -3,5 +3,6 @@ CoreELEC 19 with better support for BD-J menus
 
 + libbluray 1.2.1
 
-+ patch from da-anda <da-anda@xbmc.org>
-allow chapter seeking in overlay menus of blu-rays
++ patch from fandangos <veggav@gmail.com>
+  Fix chapter skip and seek in blurays with popup menus
+
