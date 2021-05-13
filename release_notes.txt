@@ -1,5 +1,5 @@
 [B][COLOR red]CoreELEC 19[/COLOR][/B]
-CoreELEC 19 with better support for BD-J menus
+CoreELEC 19.1 with better support for BD-J menus
 
 + libbluray 1.2.1
 
