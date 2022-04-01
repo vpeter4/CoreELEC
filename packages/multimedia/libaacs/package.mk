@@ -4,6 +4,10 @@
 PKG_NAME="libaacs"
 PKG_VERSION="0.11.0"
 PKG_SHA256="6d884381fbb659e2a565eba91e72499778635975e4b3d6fd94ab364a25965387"
+
+PKG_VERSION="0.11.1"
+PKG_SHA256=""
+
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.videolan.org/developers/libaacs.html"
 PKG_URL="http://download.videolan.org/pub/videolan/libaacs/${PKG_VERSION}/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
