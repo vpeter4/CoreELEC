@@ -61,6 +61,7 @@ mount -o rw,remount ${BOOT_ROOT}
 
 DT_ID=""
 SUBDEVICE=""
+CE_ON_EMMC="no"
 
 for arg in $(cat /proc/cmdline); do
   case ${arg} in
@@ -75,6 +76,7 @@ for arg in $(cat /proc/cmdline); do
           ;;
         FOLDER=*)
           BOOT_UUID="$(blkid ${boot#*=} | sed 's/.* UUID="//;s/".*//g')"
+          CE_ON_EMMC="ext4"
           ;;
       esac
 
@@ -240,7 +242,9 @@ if [ -f ${BOOT_ROOT}/boot.ini ]; then
   fi
 fi
 
-mount -o ro,remount ${BOOT_ROOT}
+if [ "${CE_ON_EMMC}" != "ext4" ]; then
+  mount -o ro,remount ${BOOT_ROOT}
+fi
 
 # Leave a hint that we just did an update
 echo "UPDATE" > /storage/.config/boot.hint

@@ -561,8 +561,39 @@ local flash_label
 
 check_disks() {
   if [ "$RUN_FSCK" = "yes" -a -n "$RUN_FSCK_DISKS" ]; then
+    local run_fsck_disks_tmp="${RUN_FSCK_DISKS}"
+    RUN_FSCK_DISKS=""
+
+    # remove disk duplicates like /dev/data /dev/data
+    for fsck_disk in ${run_fsck_disks_tmp}; do
+      case " ${RUN_FSCK_DISKS} " in
+        *" ${fsck_disk} "*)
+          continue ;;
+        *)
+          #RUN_FSCK_DISKS="${RUN_FSCK_DISKS} ${fsck_disk}" ;;
+          if [ -z "${RUN_FSCK_DISKS}" ]; then
+            RUN_FSCK_DISKS="${fsck_disk}"
+          else
+            RUN_FSCK_DISKS="${RUN_FSCK_DISKS} ${fsck_disk}"
+          fi
+          ;;
+      esac
+    done
+
     progress "Checking disk(s): $RUN_FSCK_DISKS"
     for i in 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0; do
+      # Android 12 has /dev/data
+      # Android 14 has /dev/userdata
+      # if we found /dev/userdata use that partition for checking
+      #  and also set new boot= and disk=
+
+      if [ -b /dev/userdata -a "${RUN_FSCK_DISKS}" = "/dev/data" -a "${boot}" = "FOLDER=/dev/data" -a "${disk}" = "FOLDER=/dev/data" ]; then
+        RUN_FSCK_DISKS="/dev/userdata"
+        boot="FOLDER=${RUN_FSCK_DISKS}"
+        disk="FOLDER=${RUN_FSCK_DISKS}"
+        progress "Disk changed to ${RUN_FSCK_DISKS}"
+      fi
+
       /usr/sbin/fsck -T -M -p -a $RUN_FSCK_DISKS >/dev/fsck.latest 2>&1
       FSCK_RET=$?
       cat /dev/fsck.latest >>/dev/fsck.log
@@ -1199,10 +1230,10 @@ for arg in $(cat /proc/cmdline); do
           FLASH_NETBOOT=yes
           ;;
         /dev/*|LABEL=*|UUID=*)
-          RUN_FSCK_DISKS="$RUN_FSCK_DISKS $boot"
+          RUN_FSCK_DISKS="${boot}"
           ;;
         FOLDER=*)
-          RUN_FSCK_DISKS="$RUN_FSCK_DISKS ${boot#*=}"
+          RUN_FSCK_DISKS="${boot#*=}"
           ;;
       esac
       ;;

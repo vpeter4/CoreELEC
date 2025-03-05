@@ -9,10 +9,18 @@ setenv frac_rate_policy "0"
 setenv consoleopt "console=tty0 no_console_suspend"
 
 setenv rootopt "BOOT_IMAGE=kernel.img boot=LABEL=COREELEC disk=LABEL=STORAGE"
-if test "${ce_on_emmc}" = "yes"; then setenv rootopt "BOOT_IMAGE=kernel.img boot=LABEL=CE_FLASH disk=FOLDER=/dev/CE_STORAGE"; fi
 
-if fatload ${device} ${devnr}:${partnr} ${loadaddr} resolution.ini; then env import -t ${loadaddr} ${filesize}; fi
-if fatload ${device} ${devnr}:${partnr} ${loadaddr} config.ini; then env import -t ${loadaddr} ${filesize}; fi
+if test "${ce_on_emmc}" = "ext4"; then
+  setenv rootopt "BOOT_IMAGE=kernel.img boot=FOLDER=/dev/data disk=FOLDER=/dev/data"
+
+  if ext4load ${device} ${devnr}:${partnr} ${loadaddr} /coreelec_flash/resolution.ini; then env import -t ${loadaddr} ${filesize}; fi
+  if ext4load ${device} ${devnr}:${partnr} ${loadaddr} /coreelec_flash/config.ini; then env import -t ${loadaddr} ${filesize}; fi
+else
+  if test "${ce_on_emmc}" = "yes"; then setenv rootopt "BOOT_IMAGE=kernel.img boot=LABEL=CE_FLASH disk=FOLDER=/dev/CE_STORAGE"; fi
+
+  if fatload ${device} ${devnr}:${partnr} ${loadaddr} resolution.ini; then env import -t ${loadaddr} ${filesize}; fi
+  if fatload ${device} ${devnr}:${partnr} ${loadaddr} config.ini; then env import -t ${loadaddr} ${filesize}; fi
+fi
 
 if test "${cec_func_config}" != ""; then setenv cec "hdmitx=cec${cec_func_config}"; fi
 if test "${gpiopower}" != ""; then setenv gpiopower "gpiopower=${gpiopower}"; fi
@@ -30,8 +38,13 @@ setenv displayopt "vout=${vout},dis frac_rate_policy=${frac_rate_policy} hdmitx=
 setenv initargs "${rootopt} ${consoleopt} ${fbcon} ${keymap} ${max_freq_cluster} ${localmac} ${cec} ${irsetup} ${usbpower} ${gpiopower}"
 setenv bootargs "${bootargs} ${initargs} ${displayopt} ${coreelec}"
 
-fatload ${device} ${devnr}:${partnr} ${loadaddr} kernel.img
-fatload ${device} ${devnr}:${partnr} ${dtb_mem_addr} dtb.img
+if test "${ce_on_emmc}" = "ext4"; then
+  ext4load ${device} ${devnr}:${partnr} ${loadaddr} /coreelec_flash/kernel.img;
+  ext4load ${device} ${devnr}:${partnr} ${dtb_mem_addr} /coreelec_flash/dtb.img;
+else
+  fatload ${device} ${devnr}:${partnr} ${loadaddr} kernel.img;
+  fatload ${device} ${devnr}:${partnr} ${dtb_mem_addr} dtb.img;
+fi
 
 bootm ${loadaddr}
 bootm start
